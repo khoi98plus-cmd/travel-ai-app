@@ -1,5 +1,5 @@
-// logic.js - BẢN TỔNG LỰC: FIX ẢNH ĐỘNG & LỊCH TRÌNH MẶN MÀ
-const API_URL = "https://travel-ai-app-oawx.onrender.com";
+// logic.js - BẢN CHUẨN CUỐI CÙNG: FIX LỖI HIỂN THỊ ẢNH & LỊCH TRÌNH
+const API_URL = "https://onrender.com";
 
 async function askAI() {
     const query = document.getElementById('query').value.trim();
@@ -12,23 +12,23 @@ async function askAI() {
     if (firstLook) firstLook.classList.add('hidden');
 
     try {
-        const resp = await fetch(API_URL + "/generate-trip", {
+        const resp = await fetch(`${API_URL}/generate-trip`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ query: query })
         });
         const data = await resp.json();
 
-        // FIX: Thêm dấu $ và kích thước 1200x800 để lấy ảnh chuẩn
+        // Nguồn ảnh động lấy từ LoremFlickr với kích thước chuẩn 1200x800
         const imgUrl = `https://loremflickr.com{encodeURIComponent(query)}`;
         
         renderLuxuryUI(data, imgUrl, query);
 
     } catch (e) {
-        console.error("Lỗi kết nối:", e);
-        // Link dự phòng lấy từ Unsplash qua Proxy trung gian cho chắc chắn
+        console.error("Lỗi kết nối AI:", e);
+        // Link dự phòng lấy từ Unsplash nếu AI hoặc mạng có vấn đề
         const fallback = `https://unsplash.com`;
-        renderLuxuryUI({place: query, desc: "Địa danh tuyệt vời đang chờ bạn!", cafe: "Cafe Local"}, fallback, query);
+        renderLuxuryUI({place: query, desc: "Địa danh tuyệt vời đang chờ bạn khám phá!", cafe: "Cafe Local"}, fallback, query);
     } finally {
         loading.classList.add('hidden');
     }
@@ -39,11 +39,12 @@ function renderLuxuryUI(data, imgUrl, query) {
     const placesGrid = document.getElementById('places-grid');
 
     if (placesGrid) {
+        // Sử dụng dấu huyền (`) để chèn toàn bộ khối HTML
         placesGrid.innerHTML = `
             <div class="bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-100 flex flex-col h-full text-left">
                 <div class="relative h-80 overflow-hidden bg-slate-200">
                    <img src="${imgUrl}" class="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
-                   onerror="this.src='https://vnecdn.net'">
+                        onerror="this.src='https://vnecdn.net'">
                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                 </div>
                 <div class="p-10">
@@ -105,6 +106,9 @@ async function generateFullTrip() {
                             </div>
                         `).join('')}
                     </div>
+                    <div class="mt-8 p-6 bg-slate-900 rounded-2xl text-white">
+                        <p class="text-xs italic">💡 Lời khuyên của AI: "${day.daily_advice}"</p>
+                    </div>
                 </div>
             `).join('');
         }
@@ -112,8 +116,8 @@ async function generateFullTrip() {
         if (itinerarySection) itinerarySection.classList.remove('hidden');
         window.scrollTo({ top: itinerarySection.offsetTop - 50, behavior: 'smooth' });
     } catch (e) {
-        console.error(e);
-        alert("Lên lịch trình kẹt rồi sếp ơi!");
+        console.error("Lỗi lịch trình:", e);
+        alert("Có chút trục trặc khi lên lịch trình, sếp thử lại nhé!");
     } finally {
         loading.classList.add('hidden');
     }
