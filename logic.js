@@ -1,7 +1,5 @@
 /** Base API FastAPI trên Render — ghi đè bằng window.TRAVEL_API_BASE trong index.html nếu cần */
-const API_URL = (typeof window !== "undefined" && window.TRAVEL_API_BASE
-    ? String(window.TRAVEL_API_BASE).replace(/\/$/, "")
-    : "https://dulichthuvi.onrender.com");
+const API_URL = "https://travel-ai-api-qu6z.onrender.com";
 
 function tripImageSeed(data, fallbackQuery) {
     const seed = (data && (data.img_tag || data.place)) || fallbackQuery;
