@@ -1,5 +1,5 @@
 // logic.js - BẢN HOÀN THIỆN: FIX LỖI CÚ PHÁP & LINK ẢNH ĐỘNG
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://travel-ai-app-oawx.onrender.com";
 
 async function askAI() {
     const query = document.getElementById('query').value.trim();
