@@ -1,5 +1,5 @@
-// logic.js - BẢN SẠCH CHUẨN 100%: FIX LỖI CORS & HIỂN THỊ ẢNH
-const API_URL = "https://onrender.com";
+// logic.js - BẢN CHỐT HẠ: FIX VÒNG LẶP LỖI & HIỆN ẢNH BẤT TỬ
+const API_URL = "https://travel-ai-app-1-u992.onrender.com";
 
 async function askAI() {
     const query = document.getElementById('query').value.trim();
@@ -12,26 +12,23 @@ async function askAI() {
     if (firstLook) firstLook.classList.add('hidden');
 
     try {
-        // Gửi yêu cầu đến Backend Render
         const resp = await fetch(`${API_URL}/generate-trip`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ query: query })
         });
-
-        if (!resp.ok) throw new Error('Backend chưa phản hồi');
         const data = await resp.json();
 
-        // Sử dụng nguồn ảnh Bing - cực kỳ nhẹ và không bị nhà mạng chặn
+        // Nguồn ảnh Bing cực kỳ ổn định tại Việt Nam
         const imgUrl = `https://bing.net{encodeURIComponent(query)}&w=1200&h=800&c=7&rs=1`;
         
         renderLuxuryUI(data, imgUrl, query);
 
     } catch (e) {
-        console.error("Lỗi:", e);
-        // Link dự phòng từ báo VnExpress - chắc chắn hiện ảnh
-        const fallback = "https://vnecdn.net";
-        renderLuxuryUI({place: query, desc: "Địa danh tuyệt vời đang chờ bạn!", cafe: "Cafe Local"}, fallback, query);
+        console.error("Lỗi AI:", e);
+        // Link dự phòng lấy từ Unsplash qua server trung gian
+        const fallback = "https://unsplash.com";
+        renderLuxuryUI({place: query, desc: "Địa danh tuyệt vời đang chờ bạn khám phá!", cafe: "Cafe Local"}, fallback, query);
     } finally {
         loading.classList.add('hidden');
     }
@@ -45,18 +42,18 @@ function renderLuxuryUI(data, imgUrl, query) {
         placesGrid.innerHTML = `
             <div class="bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-100 flex flex-col h-full text-left">
                 <div class="relative h-80 overflow-hidden bg-slate-200">
-                   <img src="${imgUrl}" class="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
-                        onerror="this.src='https://vnecdn.net'">
+                   <img src="${imgUrl}" class="w-full h-full object-cover transition-transform duration-700 hover:scale-110" 
+                        onerror="this.onerror=null;this.src='https://vnecdn.net'">
                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                 </div>
                 <div class="p-10">
                     <h3 class="text-4xl font-black text-slate-800 mb-4 uppercase">${data.place || query}</h3>
-                    <p class="text-slate-500 text-base leading-relaxed italic">"${data.desc || 'Đang cập nhật mô tả...'}"</p>
+                    <p class="text-slate-500 text-base leading-relaxed italic">"${data.desc || 'Mô tả đang được AI cập nhật...'}"</p>
                     <div class="mt-6 bg-red-50 p-6 rounded-[2rem] flex items-center gap-4">
                         <i class="fa-solid fa-mug-hot text-red-500 text-2xl"></i>
                         <div>
                             <p class="text-[10px] text-red-400 font-bold uppercase tracking-widest">Gợi ý từ AI:</p>
-                            <span class="font-bold text-slate-700">${data.cafe || 'Quán cafe đẹp'}</span>
+                            <span class="font-bold text-slate-700">${data.cafe || 'Quán cafe view triệu đô'}</span>
                         </div>
                     </div>
                 </div>
@@ -115,8 +112,8 @@ async function generateFullTrip() {
         if (itinerarySection) itinerarySection.classList.remove('hidden');
         window.scrollTo({ top: itinerarySection.offsetTop - 50, behavior: 'smooth' });
     } catch (e) {
-        console.error(e);
-        alert("Lỗi tải lịch trình!");
+        console.error("Lỗi lịch trình:", e);
+        alert("Lỗi khi tải lịch trình!");
     } finally {
         loading.classList.add('hidden');
     }
