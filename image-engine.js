@@ -18,7 +18,7 @@ const ImageEngine = {
     },
 
     placeholderUrl(label) {
-        const t = encodeURIComponent(String(label || "TravelVN").slice(0, 40));
+        const t = encodeURIComponent(String(label || "DUY GO").slice(0, 40));
         return `https://placehold.co/1200x800/0f172a/f8fafc?text=${t}`;
     },
 

@@ -1,4 +1,4 @@
-// database.js
+// database.js — dữ liệu tham khảo DUY GO (tuỳ chọn mở rộng)
 const TRAVEL_DATABASE = {
     "hà tiên": {
         "images": [
