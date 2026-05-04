@@ -1,8 +1,5 @@
 /** DUY GO — logic chính (mobile-first) */
-const API_URL = (typeof window !== "undefined" &&
-    (window.DUY_GO_API_BASE || window.TRAVEL_API_BASE)
-    ? String(window.DUY_GO_API_BASE || window.TRAVEL_API_BASE).replace(/\/$/, "")
-    : "https://dulichthuvi.onrender.com");
+const API_URL = "https://travel-ai-api-qu6z.onrender.com";
 
 const DuyAppState = {
     lastQuery: "",
