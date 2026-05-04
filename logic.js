@@ -1,5 +1,8 @@
 /** DUY GO — logic chính (mobile-first) */
-const API_URL = "https://travel-ai-api-qu6z.onrender.com";
+const API_URL = (typeof window !== "undefined" &&
+    (window.DUY_GO_API_BASE || window.TRAVEL_API_BASE)
+    ? String(window.DUY_GO_API_BASE || window.TRAVEL_API_BASE).replace(/\/$/, "")
+    : "https://dulichthuvi.onrender.com");
 
 const DuyAppState = {
     lastQuery: "",
@@ -67,14 +70,27 @@ function mapsSearchUrl(query) {
     return `https://www.google.com/maps/search/?api=1&query=${q}`;
 }
 
-function setAffiliateLinks(place) {
-    const p = encodeURIComponent(place || "Việt Nam");
+/** CID affiliate Agoda (có thể thay sau) — luôn đồng bộ mọi nút đặt phòng DUY GO */
+const AGODA_AFFILIATE_CID = "1898905";
+
+/**
+ * Link tìm khách sạn Agoda theo điểm đến (ưu tiên tên EN nếu API trả place_en).
+ * Cấu trúc: /search?q=...&cid=...
+ */
+function buildAgodaLink(data, query) {
+    const dest = String((data && data.place_en) || query || (data && data.place) || "Việt Nam").trim();
+    return `https://www.agoda.com/vi-vn/search?q=${encodeURIComponent(dest)}&cid=${AGODA_AFFILIATE_CID}`;
+}
+
+function setAffiliateLinks(data, query) {
+    const agodaLink = buildAgodaLink(data || {}, query || "");
+    const placeForBooking = encodeURIComponent((data && data.place) || query || "Việt Nam");
     const ag = document.getElementById("aff-agoda");
     const bk = document.getElementById("aff-booking");
     const fl = document.getElementById("aff-flights");
-    if (ag) ag.href = `https://www.agoda.com/vi-vn/search?cid=1914491&q=${p}`;
-    if (bk) bk.href = `https://www.booking.com/searchresults.html?ss=${p}&aid=304142`;
-    if (fl) fl.href = `https://www.skyscanner.com.vn/transport/flights/?q=${p}`;
+    if (ag) ag.href = agodaLink;
+    if (bk) bk.href = `https://www.booking.com/searchresults.html?ss=${placeForBooking}&aid=304142`;
+    if (fl) fl.href = `https://www.skyscanner.com.vn/transport/flights/?q=${placeForBooking}`;
 }
 
 function inferPeriod(slot, index) {
@@ -403,6 +419,8 @@ async function askAI() {
 }
 
 async function renderLuxuryUI(data, imgUrl, query) {
+    const agodaLink = buildAgodaLink(data, query);
+
     const section = document.getElementById("first-look-section");
     const grid = document.getElementById("places-grid");
     const galleryRow = document.getElementById("gallery-row");
@@ -428,7 +446,7 @@ async function renderLuxuryUI(data, imgUrl, query) {
     }
 
     if (mapsBtn) mapsBtn.href = mapsSearchUrl(data.place || query);
-    setAffiliateLinks(data.place || query);
+    setAffiliateLinks(data, query);
 
     const days = document.getElementById("duration")?.value || "3";
     const tier = document.getElementById("budget")?.value || "mid";
@@ -468,6 +486,17 @@ async function renderLuxuryUI(data, imgUrl, query) {
                             <p class="text-[10px] font-black uppercase text-amber-600 tracking-widest">Duy thủ thỉ</p>
                             <span class="font-bold text-slate-800">${escHtml(data.cafe)}</span>
                         </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 text-center leading-snug">Ưu đãi dành riêng cho bạn khi đặt qua Duy Go</p>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <a href=${JSON.stringify(agodaLink)} target="_blank" rel="noopener sponsored"
+                            class="flex-1 text-center font-black py-4 px-4 rounded-2xl text-white shadow-lg active:scale-[0.98] transition-transform bg-gradient-to-br from-[#288afa] to-[#0b67d7] border border-blue-400/30">
+                            <i class="fa-solid fa-hotel mr-2"></i>Đặt khách sạn
+                        </a>
+                        <a href=${JSON.stringify(agodaLink)} target="_blank" rel="noopener sponsored"
+                            class="flex-1 text-center font-black py-4 px-4 rounded-2xl text-white shadow-lg active:scale-[0.98] transition-transform bg-gradient-to-br from-rose-500 to-rose-700 border border-rose-400/40">
+                            <i class="fa-solid fa-bed mr-2"></i>Tìm chỗ ở
+                        </a>
                     </div>
                 </div>
             </div>`;
@@ -680,7 +709,7 @@ function sharePostcard() {
 
 document.addEventListener("DOMContentLoaded", () => {
     fillPhrases();
-    setAffiliateLinks("Việt Nam");
+    setAffiliateLinks({}, "Việt Nam");
     document.getElementById("duration")?.addEventListener("change", updateBudgetFromSelects);
     document.getElementById("budget")?.addEventListener("change", updateBudgetFromSelects);
 
