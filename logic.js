@@ -22,7 +22,7 @@ async function askAI() {
         const data = await resp.json();
 
         // Sử dụng từ khóa AI trả về để lấy ảnh đẹp từ Unsplash
-        const imgUrl = `https://unsplash.com{encodeURIComponent(data.img_tag || query)}`;
+        const imgUrl = `https://loremflickr.com{encodeURIComponent(data.place || query)},travel/all`;
         renderLuxuryUI(data, imgUrl);
 
     } catch (e) {
