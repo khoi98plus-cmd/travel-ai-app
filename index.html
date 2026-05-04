@@ -115,13 +115,24 @@
                 Duy thủ thỉ: nhập điểm đến, Duy lo tất từ góc sống ảo đến lịch Sáng–Tối cho team mình nhé!
             </p>
 
-            <div class="w-full max-w-lg card-duy bg-white/12 p-2 sm:p-3 rounded-[1.75rem] backdrop-blur-xl border border-white/20">
-                <div class="flex flex-col sm:flex-row bg-white rounded-2xl overflow-hidden p-1 gap-1 shadow-inner">
-                    <input id="query" type="text" enterkeyhint="search" autocomplete="off"
-                        placeholder="Đi đâu hôm nay? (VD: Đà Lạt, Phú Quốc…)"
-                        class="flex-1 px-4 sm:px-6 py-4 text-slate-800 outline-none text-base font-bold rounded-xl sm:rounded-none bg-white">
+            <div class="w-full max-w-2xl card-duy bg-white/12 p-2 sm:p-3 rounded-[1.75rem] backdrop-blur-xl border border-white/20 space-y-2">
+                <div class="flex flex-col sm:flex-row bg-white rounded-2xl overflow-hidden shadow-inner divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+                    <label class="flex flex-col gap-0.5 px-4 py-3 sm:py-4 sm:w-[38%] shrink-0 bg-slate-50/80 sm:bg-white">
+                        <span class="text-[10px] font-black uppercase tracking-wider text-rose-500">Đi từ đâu?</span>
+                        <input id="origin-query" type="text" autocomplete="address-level1" enterkeyhint="search" value="Sài Gòn"
+                            placeholder="VD: Sài Gòn, Hà Nội…"
+                            class="w-full bg-transparent text-slate-900 outline-none text-sm sm:text-base font-bold placeholder:text-slate-400 placeholder:font-semibold">
+                    </label>
+                    <label class="flex flex-col gap-0.5 flex-1 px-4 py-3 sm:py-4 min-w-0">
+                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Điểm đến</span>
+                        <input id="query" type="text" enterkeyhint="search" autocomplete="off"
+                            placeholder="Đi đâu hôm nay? (VD: Đà Lạt, Phú Quốc…)"
+                            class="w-full bg-transparent text-slate-800 outline-none text-base font-bold placeholder:text-slate-400">
+                    </label>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-1 p-1">
                     <button type="button" onclick="askAI()"
-                        class="bg-rose-500 hover:bg-rose-600 active:scale-[0.98] text-white px-6 sm:px-8 py-4 rounded-xl sm:rounded-2xl font-black text-sm flex items-center justify-center gap-2 shrink-0 transition-transform">
+                        class="flex-1 bg-rose-500 hover:bg-rose-600 active:scale-[0.98] text-white px-6 py-4 rounded-xl sm:rounded-2xl font-black text-sm flex items-center justify-center gap-2 transition-transform shadow-lg">
                         <span>Tìm với Duy</span><i class="fa-solid fa-wand-magic-sparkles"></i>
                     </button>
                 </div>
@@ -178,7 +189,7 @@
             </div>
             <a id="aff-flights" href="#" target="_blank" rel="noopener sponsored"
                 class="card-duy block bg-gradient-to-r from-sky-600 to-indigo-600 text-white p-5 text-center font-black rounded-2xl shadow-lg active:scale-[0.99] transition-transform">
-                <i class="fa-solid fa-plane-circle-check mr-2"></i> Vé máy bay giá rẻ (Skyscanner)
+                <i class="fa-solid fa-plane-circle-check mr-2"></i> Vé máy bay khứ hồi (từ điểm khởi hành → đến)
             </a>
             <aside class="ad-slot rounded-2xl flex items-center justify-center text-xs text-slate-500 py-8" aria-label="Vị trí quảng cáo dọc">
                 Banner AdSense responsive (in-article)

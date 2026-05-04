@@ -10,6 +10,9 @@ const DuyAppState = {
     lastItinerary: null,
     lastWeather: null,
     fxRateVndPerUsd: 25450,
+    /** Khoảng cách bay ước lượng (km) giữa điểm khởi hành và điểm đến */
+    lastFlightKm: null,
+    lastOrigin: "Sài Gòn",
 };
 
 const PERIOD_META = {
@@ -70,6 +73,80 @@ function mapsSearchUrl(query) {
     return `https://www.google.com/maps/search/?api=1&query=${q}`;
 }
 
+function getOriginInput() {
+    const el = document.getElementById("origin-query");
+    const v = el && el.value != null ? String(el.value).trim() : "";
+    return v || "Sài Gòn";
+}
+
+function normalizePlaceName(s) {
+    return String(s || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+}
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos((lat1 * Math.PI) / 180) *
+            Math.cos((lat2 * Math.PI) / 180) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
+/** Vé khứ hồi nội địa ước lượng theo km (tham khảo thị trường ~1,5–2,5tr cho tuyến trung bình). */
+function estimateDomesticRoundTripVnd(km, tier) {
+    const mult = tier === "eco" ? 0.88 : tier === "lux" ? 1.2 : 1;
+    if (km == null || Number.isNaN(km)) {
+        return Math.round(2000000 * mult);
+    }
+    if (km < 30) return 0;
+    let base;
+    if (km < 150) base = 950000 + km * 3500;
+    else if (km < 450) base = 1300000 + (km - 150) * 2800;
+    else if (km < 950) base = 1750000 + (km - 450) * 1100;
+    else if (km < 2200) base = 2300000 + (km - 950) * 650;
+    else base = 5200000;
+    return Math.round(Math.min(Math.max(base * mult, 750000), 15000000));
+}
+
+/** Link tìm vé khứ hồi (Google Flights — hỗ trợ câu tự nhiên A → B). */
+function buildRoundTripFlightUrl(origin, dest) {
+    const o = String(origin || "Sài Gòn").trim();
+    const d = String(dest || "Việt Nam").trim();
+    const q = `Round trip flights from ${o} to ${d}`;
+    return `https://www.google.com/travel/flights?q=${encodeURIComponent(q)}`;
+}
+
+async function refreshFlightEstimateForRoute(origin, destLabel, tier) {
+    const o = String(origin || "Sài Gòn").trim();
+    const d = String(destLabel || "").trim();
+    DuyAppState.lastOrigin = o;
+    if (!d || normalizePlaceName(o) === normalizePlaceName(d)) {
+        DuyAppState.lastFlightKm = 0;
+        return;
+    }
+    try {
+        const [go, gd] = await Promise.all([geocodePlace(o), geocodePlace(d)]);
+        if (go && gd) {
+            DuyAppState.lastFlightKm = haversineKm(go.lat, go.lon, gd.lat, gd.lon);
+        } else {
+            DuyAppState.lastFlightKm = 520;
+        }
+    } catch {
+        DuyAppState.lastFlightKm = 520;
+    }
+}
+
 /** CID affiliate Agoda (có thể thay sau) — luôn đồng bộ mọi nút đặt phòng DUY GO */
 const AGODA_AFFILIATE_CID = "1898905";
 
@@ -82,15 +159,19 @@ function buildAgodaLink(data, query) {
     return `https://www.agoda.com/vi-vn/search?q=${encodeURIComponent(dest)}&cid=${AGODA_AFFILIATE_CID}`;
 }
 
-function setAffiliateLinks(data, query) {
+function setAffiliateLinks(data, query, originOverride) {
     const agodaLink = buildAgodaLink(data || {}, query || "");
-    const placeForBooking = encodeURIComponent((data && data.place) || query || "Việt Nam");
+    const destLabel = String((data && data.place) || query || "Việt Nam").trim();
+    const placeForBooking = encodeURIComponent(destLabel);
+    const originLabel = originOverride != null && String(originOverride).trim()
+        ? String(originOverride).trim()
+        : getOriginInput();
     const ag = document.getElementById("aff-agoda");
     const bk = document.getElementById("aff-booking");
     const fl = document.getElementById("aff-flights");
     if (ag) ag.href = agodaLink;
     if (bk) bk.href = `https://www.booking.com/searchresults.html?ss=${placeForBooking}&aid=304142`;
-    if (fl) fl.href = `https://www.skyscanner.com.vn/transport/flights/?q=${placeForBooking}`;
+    if (fl) fl.href = buildRoundTripFlightUrl(originLabel, destLabel);
 }
 
 function inferPeriod(slot, index) {
@@ -172,19 +253,32 @@ function budgetRows(days, tier) {
     const perDayEat = Math.round(450000 * mult);
     const perDayMove = Math.round(200000 * mult);
     const tickets = Math.round(300000 * d * mult * 0.4);
-    const room = perNightRoom * Math.max(1, d - (d > 1 ? 0 : 0));
     const nights = Math.max(1, d - 1);
     const roomTotal = perNightRoom * nights;
     const eat = perDayEat * d;
     const move = perDayMove * d;
-    const total = roomTotal + eat + move + tickets;
-    return [
+    const km = typeof DuyAppState.lastFlightKm === "number" ? DuyAppState.lastFlightKm : null;
+    const flightRt = estimateDomesticRoundTripVnd(km, tier);
+    const total = roomTotal + eat + move + tickets + flightRt;
+    const rows = [
         { k: "Phòng (ước lượng)", v: roomTotal, icon: "fa-bed" },
         { k: "Ăn uống", v: eat, icon: "fa-bowl-food" },
         { k: "Di chuyển nội địa", v: move, icon: "fa-bus" },
         { k: "Vé tham quan / show", v: tickets, icon: "fa-ticket" },
+        {
+            k: "Vé máy bay khứ hồi (ước lượng)",
+            v: flightRt,
+            icon: "fa-plane",
+            hint:
+                km != null && km < 30
+                    ? "Hai điểm rất gần — Duy khuyên xe/xe khách thay vì bay."
+                    : km != null
+                      ? `Theo khoảng cách ~${Math.round(km)} km (nội địa).`
+                      : "Chưa có tuyến — Duy đang dùng mức trung bình nội địa; bấm Tìm với Duy để cập nhật.",
+        },
         { k: "Tổng dự kiến", v: total, icon: "fa-wallet", bold: true },
     ];
+    return rows;
 }
 
 function formatVnd(n) {
@@ -237,16 +331,26 @@ function renderBudgetCard(days, tier) {
     const el = document.getElementById("budget-card");
     if (!el) return;
     const rows = budgetRows(days, tier);
-    const body = rows.map((r) => `
-        <div class="flex justify-between items-center gap-2 py-2 border-b border-slate-100 last:border-0 ${r.bold ? "font-black text-rose-600 text-base pt-3" : "text-sm"}">
-            <span class="flex items-center gap-2 text-slate-700 ${r.bold ? "" : ""}">
+    const body = rows
+        .map((r) => {
+            const hintBlock = r.hint
+                ? `<p class="text-[10px] text-slate-400 mt-0.5 pl-7 leading-snug">${escHtml(r.hint)}</p>`
+                : "";
+            return `
+        <div class="py-2 border-b border-slate-100 last:border-0 ${r.bold ? "font-black text-rose-600 text-base pt-3" : "text-sm"}">
+            <div class="flex justify-between items-center gap-2">
+            <span class="flex items-center gap-2 text-slate-700">
                 <i class="fa-solid ${r.icon} text-slate-400 w-5 text-center"></i> ${escHtml(r.k)}
             </span>
             <span>${formatVnd(r.v)}</span>
-        </div>`).join("");
+            </div>${hintBlock}
+        </div>`;
+        })
+        .join("");
+    const origin = escHtml(getOriginInput());
     el.innerHTML = `
         <p class="text-[10px] font-black uppercase text-emerald-600 tracking-widest mb-2">Ngân sách dự kiến (${escHtml(String(days))} ngày)</p>
-        <p class="text-xs text-slate-500 mb-3">Duy tính sơ theo mức <strong>${tier === "eco" ? "tiết kiệm" : tier === "lux" ? "xả láng" : "tiêu chuẩn"}</strong> — chỉ mang tính tham khảo.</p>
+        <p class="text-xs text-slate-500 mb-3">Khởi hành: <strong>${origin}</strong> · Duy tính sơ theo mức <strong>${tier === "eco" ? "tiết kiệm" : tier === "lux" ? "xả láng" : "tiêu chuẩn"}</strong> — chỉ mang tính tham khảo.</p>
         ${body}`;
 }
 
@@ -373,6 +477,10 @@ async function askAI() {
         DuyAppState.lastQuery = query;
         DuyAppState.lastTrip = data;
 
+        const origin = getOriginInput();
+        const tier = document.getElementById("budget")?.value || "mid";
+        await refreshFlightEstimateForRoute(origin, data.place || query, tier);
+
         const imgUrl = tripCoverImageUrl(data, query);
         await renderLuxuryUI(data, imgUrl, query);
 
@@ -410,6 +518,9 @@ async function askAI() {
             safety_tips: ["Book xe qua app", "Giữ túi trước người"],
         };
         DuyAppState.lastTrip = fallback;
+        const originFb = getOriginInput();
+        const tierFb = document.getElementById("budget")?.value || "mid";
+        await refreshFlightEstimateForRoute(originFb, query, tierFb);
         await renderLuxuryUI(fallback, tripCoverImageUrl(fallback, query), query);
         renderWeatherCard(query, null);
         renderPackingCard(fallback.packing_hints);
@@ -446,7 +557,7 @@ async function renderLuxuryUI(data, imgUrl, query) {
     }
 
     if (mapsBtn) mapsBtn.href = mapsSearchUrl(data.place || query);
-    setAffiliateLinks(data, query);
+    setAffiliateLinks(data, query, getOriginInput());
 
     const days = document.getElementById("duration")?.value || "3";
     const tier = document.getElementById("budget")?.value || "mid";
@@ -496,6 +607,10 @@ async function renderLuxuryUI(data, imgUrl, query) {
                         <a href=${JSON.stringify(agodaLink)} target="_blank" rel="noopener sponsored"
                             class="flex-1 text-center font-black py-4 px-4 rounded-2xl text-white shadow-lg active:scale-[0.98] transition-transform bg-gradient-to-br from-rose-500 to-rose-700 border border-rose-400/40">
                             <i class="fa-solid fa-bed mr-2"></i>Tìm chỗ ở
+                        </a>
+                        <a href=${JSON.stringify(buildRoundTripFlightUrl(getOriginInput(), data.place || query))} target="_blank" rel="noopener sponsored"
+                            class="flex-1 text-center font-black py-4 px-4 rounded-2xl text-white shadow-lg active:scale-[0.98] transition-transform bg-gradient-to-br from-sky-500 to-indigo-600 border border-sky-300/40">
+                            <i class="fa-solid fa-plane mr-2"></i>Vé khứ hồi
                         </a>
                     </div>
                 </div>
@@ -707,11 +822,26 @@ function sharePostcard() {
     });
 }
 
+let _originDebounce;
 document.addEventListener("DOMContentLoaded", () => {
     fillPhrases();
-    setAffiliateLinks({}, "Việt Nam");
+    setAffiliateLinks({}, "Việt Nam", getOriginInput());
     document.getElementById("duration")?.addEventListener("change", updateBudgetFromSelects);
     document.getElementById("budget")?.addEventListener("change", updateBudgetFromSelects);
+    document.getElementById("origin-query")?.addEventListener("input", () => {
+        clearTimeout(_originDebounce);
+        _originDebounce = setTimeout(async () => {
+            if (!DuyAppState.lastTrip) {
+                setAffiliateLinks({}, "Việt Nam", getOriginInput());
+                return;
+            }
+            const tier = document.getElementById("budget")?.value || "mid";
+            const dest = DuyAppState.lastTrip.place || DuyAppState.lastQuery;
+            await refreshFlightEstimateForRoute(getOriginInput(), dest, tier);
+            updateBudgetFromSelects();
+            setAffiliateLinks(DuyAppState.lastTrip, DuyAppState.lastQuery, getOriginInput());
+        }, 450);
+    });
 
     const fx = document.getElementById("fx-vnd");
     const out = document.getElementById("fx-usd");
