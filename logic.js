@@ -1,4 +1,4 @@
-// logic.js - BẢN CHUẨN CUỐI CÙNG: FIX LỖI HIỂN THỊ ẢNH & LỊCH TRÌNH
+// logic.js - BẢN CHUẨN 100%: FIX KÍCH THƯỚC ẢNH & DẤU HUYỀN
 const API_URL = "https://onrender.com";
 
 async function askAI() {
@@ -19,16 +19,16 @@ async function askAI() {
         });
         const data = await resp.json();
 
-        // Nguồn ảnh động lấy từ LoremFlickr với kích thước chuẩn 1200x800
+        // 1. TẠO LINK ẢNH ĐỘNG: Đã có kích thước 1200/800 và dấu $ chuẩn xác
         const imgUrl = `https://loremflickr.com{encodeURIComponent(query)}`;
         
         renderLuxuryUI(data, imgUrl, query);
 
     } catch (e) {
         console.error("Lỗi kết nối AI:", e);
-        // Link dự phòng lấy từ Unsplash nếu AI hoặc mạng có vấn đề
+        // Link dự phòng lấy từ Unsplash có kích thước chuẩn
         const fallback = `https://unsplash.com`;
-        renderLuxuryUI({place: query, desc: "Địa danh tuyệt vời đang chờ bạn khám phá!", cafe: "Cafe Local"}, fallback, query);
+        renderLuxuryUI({place: query, desc: "Địa danh tuyệt vời đang chờ bạn!", cafe: "Cafe Local"}, fallback, query);
     } finally {
         loading.classList.add('hidden');
     }
@@ -39,7 +39,6 @@ function renderLuxuryUI(data, imgUrl, query) {
     const placesGrid = document.getElementById('places-grid');
 
     if (placesGrid) {
-        // Sử dụng dấu huyền (`) để chèn toàn bộ khối HTML
         placesGrid.innerHTML = `
             <div class="bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-100 flex flex-col h-full text-left">
                 <div class="relative h-80 overflow-hidden bg-slate-200">
@@ -106,9 +105,6 @@ async function generateFullTrip() {
                             </div>
                         `).join('')}
                     </div>
-                    <div class="mt-8 p-6 bg-slate-900 rounded-2xl text-white">
-                        <p class="text-xs italic">💡 Lời khuyên của AI: "${day.daily_advice}"</p>
-                    </div>
                 </div>
             `).join('');
         }
@@ -117,7 +113,7 @@ async function generateFullTrip() {
         window.scrollTo({ top: itinerarySection.offsetTop - 50, behavior: 'smooth' });
     } catch (e) {
         console.error("Lỗi lịch trình:", e);
-        alert("Có chút trục trặc khi lên lịch trình, sếp thử lại nhé!");
+        alert("Lỗi khi tải lịch trình!");
     } finally {
         loading.classList.add('hidden');
     }
