@@ -1,4 +1,4 @@
-const API_URL = "https://travel-ai-app-1-u992.onrender.com";
+const API_URL = "https://travel-ai-api-qu6z.onrender.com";
 
 // Hàm gọi AI chính
 async function askAI() {
