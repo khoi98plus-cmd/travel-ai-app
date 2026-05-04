@@ -1,4 +1,4 @@
-// logic.js - BẢN HOÀN THIỆN: FIX LỖI CÚ PHÁP & LINK ẢNH ĐỘNG
+// logic.js - BẢN TỔNG LỰC: FIX ẢNH ĐỘNG & LỊCH TRÌNH MẶN MÀ
 const API_URL = "https://travel-ai-app-oawx.onrender.com";
 
 async function askAI() {
@@ -19,21 +19,20 @@ async function askAI() {
         });
         const data = await resp.json();
 
-        // SỬ DỤNG NGUỒN ẢNH CỦA BING/GOOGLE (CỰC KỲ KHÓ BỊ CHẶN)
-        const imgUrl = `https://vnecdn.net`;
+        // FIX: Thêm dấu $ và kích thước 1200x800 để lấy ảnh chuẩn
+        const imgUrl = `https://loremflickr.com{encodeURIComponent(query)}`;
         
         renderLuxuryUI(data, imgUrl, query);
 
     } catch (e) {
         console.error("Lỗi kết nối:", e);
-        // Link dự phòng lấy từ báo Việt Nam (VnExpress) - Chắc chắn hiện
-        const fallback = "https://vnecdn.net";
-        renderLuxuryUI({place: query, desc: "Địa danh tuyệt vời!", cafe: "Cafe Local"}, fallback, query);
+        // Link dự phòng lấy từ Unsplash qua Proxy trung gian cho chắc chắn
+        const fallback = `https://unsplash.com`;
+        renderLuxuryUI({place: query, desc: "Địa danh tuyệt vời đang chờ bạn!", cafe: "Cafe Local"}, fallback, query);
     } finally {
         loading.classList.add('hidden');
     }
 }
-
 
 function renderLuxuryUI(data, imgUrl, query) {
     const firstLook = document.getElementById('first-look-section');
@@ -43,8 +42,9 @@ function renderLuxuryUI(data, imgUrl, query) {
         placesGrid.innerHTML = `
             <div class="bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-100 flex flex-col h-full text-left">
                 <div class="relative h-80 overflow-hidden bg-slate-200">
-                    <img src="${imgUrl}" class="w-full h-full object-cover transition-transform duration-700 hover:scale-110" 
-                         onerror="this.src='https://wsrv.nl'">
+                   <img src="${imgUrl}" class="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+                   onerror="this.src='https://vnecdn.net'">
+                   <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                 </div>
                 <div class="p-10">
                     <h3 class="text-4xl font-black text-slate-800 mb-4 uppercase">${data.place || query}</h3>
@@ -113,7 +113,7 @@ async function generateFullTrip() {
         window.scrollTo({ top: itinerarySection.offsetTop - 50, behavior: 'smooth' });
     } catch (e) {
         console.error(e);
-        alert("Lỗi khi tải lịch trình!");
+        alert("Lên lịch trình kẹt rồi sếp ơi!");
     } finally {
         loading.classList.add('hidden');
     }
