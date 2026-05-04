@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#7f1d1d">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="DUY GO">
     <title>DUY GO — Đi đâu cũng được, miễn là đi cùng nhau!</title>
@@ -16,71 +16,96 @@
 
     <style>
         :root {
-            --duy-rose: #f43f5e;
-            --duy-ink: #0f172a;
-            --duy-cream: #fff7ed;
+            --duy-velvet: #9f1239;
+            --duy-velvet-light: #e11d48;
+            --duy-porcelain: #faf8f5;
+            --duy-gold: #c9a227;
+            --duy-gold-soft: #e8d48b;
+            --duy-ink: #1c1917;
         }
         html { scroll-behavior: smooth; }
         body {
             font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+            background: linear-gradient(180deg, var(--duy-porcelain) 0%, #f5f0e8 55%, #efe8dc 100%);
+            padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
             -webkit-tap-highlight-color: transparent;
+            color: var(--duy-ink);
         }
         .hero-bg {
-            background: linear-gradient(165deg, rgba(15,23,42,0.75) 0%, rgba(244,63,94,0.35) 45%, rgba(15,23,42,0.85) 100%),
-                url('https://loremflickr.com/1920/1080/vietnam,sunset,travel');
+            background: linear-gradient(165deg, rgba(28,25,23,0.82) 0%, rgba(159,18,57,0.45) 42%, rgba(28,25,23,0.9) 100%),
+                url('https://loremflickr.com/1920/1080/vietnam,golden,hour,travel');
             background-size: cover;
             background-position: center;
         }
         .glass-nav {
-            background: rgba(15, 23, 42, 0.45);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(18px) saturate(160%);
+            -webkit-backdrop-filter: blur(18px) saturate(160%);
+            border-bottom: 1px solid rgba(232, 212, 139, 0.15);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.22);
         }
         .card-duy {
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 40px -12px rgba(15, 23, 42, 0.18), 0 4px 16px -8px rgba(244, 63, 94, 0.12);
+            border-radius: 3rem;
+            box-shadow: 0 20px 50px -18px rgba(28, 25, 23, 0.12), 0 8px 24px -12px rgba(159, 18, 57, 0.1);
+            border: 1px solid rgba(201, 162, 39, 0.12);
         }
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(28px); }
+            from { opacity: 0; transform: translateY(24px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .animate-up { animation: fadeInUp 0.75s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .animate-up { animation: fadeInUp 0.85s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
         .skeleton {
-            background: linear-gradient(90deg, #e2e8f0 0%, #f8fafc 45%, #e2e8f0 90%);
-            background-size: 200% 100%;
-            animation: shimmer 1.15s ease-in-out infinite;
-            border-radius: 0.75rem;
+            background: linear-gradient(105deg, #ede8e0 0%, #faf8f5 38%, #f0ebe3 52%, #faf8f5 65%, #ede8e0 100%);
+            background-size: 220% 100%;
+            animation: shimmer 1.85s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+            border-radius: 1.25rem;
         }
+        .skeleton-round { border-radius: 3rem; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .bottom-nav {
             padding-bottom: env(safe-area-inset-bottom, 0.5rem);
-            box-shadow: 0 -12px 40px -16px rgba(15,23,42,0.25);
+            background: rgba(255, 252, 248, 0.88) !important;
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border-top: 1px solid rgba(201, 162, 39, 0.25);
+            box-shadow: 0 -16px 48px -20px rgba(28, 25, 23, 0.18);
+            border-radius: 1.75rem 1.75rem 0 0;
+            margin-left: 0.5rem;
+            margin-right: 0.5rem;
         }
-        .nav-item-active { color: var(--duy-rose) !important; }
+        .nav-item-active { color: var(--duy-velvet-light) !important; text-shadow: 0 0 20px rgba(232, 212, 139, 0.35); }
         .ad-slot {
             min-height: 90px;
-            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-            border: 1px dashed #cbd5e1;
+            background: linear-gradient(135deg, rgba(250,248,245,0.95) 0%, rgba(237,232,224,0.9) 100%);
+            border: 1px dashed rgba(201, 162, 39, 0.35);
+        }
+        .sovereignty-line {
+            color: var(--duy-gold-soft);
+            text-shadow: 0 0 24px rgba(201, 162, 39, 0.35);
+            letter-spacing: 0.04em;
         }
         #duy-drawer { transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1); }
         #duy-drawer.open { transform: translateY(0); }
         #postcard-canvas { display: none; }
     </style>
 </head>
-<body class="bg-orange-50/40 text-slate-900 antialiased">
+<body class="text-slate-900 antialiased">
 
     <!-- Top bar -->
-    <div class="bg-slate-900 text-white text-[10px] sm:text-xs py-2 px-4 flex justify-between items-center font-bold tracking-wide z-[70] relative">
+    <div class="bg-gradient-to-r from-stone-900 via-red-950 to-stone-900 text-white text-[10px] sm:text-xs py-2 px-4 flex justify-between items-center font-bold tracking-wide z-[70] relative border-b border-amber-400/20">
         <div class="flex items-center gap-2 truncate">
-            <i class="fa-solid fa-heart text-rose-400 shrink-0"></i>
-            <span class="truncate">DUY GO · Cùng nhau là đủ</span>
+            <i class="fa-solid fa-heart text-amber-300/90 shrink-0"></i>
+            <span class="truncate">DUY GO · Cùng Duy Vi Vu</span>
         </div>
         <div class="flex gap-3 shrink-0 text-rose-300">
             <i class="fab fa-facebook-f"></i>
@@ -91,12 +116,12 @@
     <header id="section-search" class="hero-bg min-h-[min(88vh,720px)] relative flex flex-col">
         <nav class="glass-nav sticky top-0 z-50 px-4 sm:px-6 py-3 flex justify-between items-center text-white gap-2">
             <div class="flex items-center gap-2 min-w-0 cursor-pointer" onclick="scrollToId('section-search')">
-                <div class="bg-rose-500 p-2 rounded-2xl shadow-lg shadow-rose-500/30 shrink-0">
+                <div class="bg-gradient-to-br from-rose-600 to-red-900 p-2 rounded-2xl shadow-lg shadow-amber-900/30 ring-1 ring-amber-400/40 shrink-0">
                     <i class="fa-solid fa-plane-departure text-amber-200 text-sm sm:text-base"></i>
                 </div>
                 <div class="min-w-0">
-                    <div class="text-lg sm:text-2xl font-black italic tracking-tight leading-none">DUY<span class="text-rose-400"> GO</span></div>
-                    <p class="text-[9px] sm:text-[10px] font-semibold text-amber-100/90 leading-tight mt-0.5 truncate max-w-[14rem] sm:max-w-xs">
+                    <div class="text-lg sm:text-2xl font-black italic tracking-tight leading-none">DUY<span class="text-amber-300"> GO</span></div>
+                    <p class="text-[9px] sm:text-[10px] font-semibold text-amber-50/95 leading-tight mt-0.5 truncate max-w-[14rem] sm:max-w-xs">
                         Đi đâu cũng được, miễn là đi cùng nhau! ❤️
                     </p>
                 </div>
@@ -107,18 +132,18 @@
         </nav>
 
         <div class="flex-1 flex flex-col items-center justify-center text-white px-4 text-center animate-up pt-4 pb-10">
-            <p class="text-rose-200 text-xs sm:text-sm font-bold uppercase tracking-[0.2em] mb-2">Duy gợi ý nè</p>
-            <h1 class="text-3xl sm:text-5xl md:text-6xl font-black mb-4 drop-shadow-xl leading-tight">
-                Cùng Duy <span class="text-rose-400">vi vu</span> khắp nơi
+            <p class="text-amber-200/90 text-xs sm:text-sm font-black uppercase tracking-[0.25em] mb-2">Duy nhắc bạn</p>
+            <h1 class="text-3xl sm:text-5xl md:text-6xl font-black mb-4 drop-shadow-2xl leading-tight tracking-tight">
+                Cùng Duy <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-rose-300">Vi Vu</span> khắp nơi
             </h1>
-            <p class="text-sm sm:text-lg mb-8 font-medium opacity-95 max-w-xl leading-relaxed">
-                Duy thủ thỉ: nhập điểm đến, Duy lo tất từ góc sống ảo đến lịch Sáng–Tối cho team mình nhé!
+            <p class="text-sm sm:text-lg mb-8 font-medium opacity-95 max-w-xl leading-relaxed text-white/90">
+                <span class="text-amber-100 font-bold">Duy Thủ Thỉ:</span> nhập điểm khởi hành &amp; đến — Duy lo tất: thời tiết, checklist, vé khứ hồi &amp; lịch Sáng–Tối cho team mình!
             </p>
 
-            <div class="w-full max-w-2xl card-duy bg-white/12 p-2 sm:p-3 rounded-[1.75rem] backdrop-blur-xl border border-white/20 space-y-2">
-                <div class="flex flex-col sm:flex-row bg-white rounded-2xl overflow-hidden shadow-inner divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
-                    <label class="flex flex-col gap-0.5 px-4 py-3 sm:py-4 sm:w-[38%] shrink-0 bg-slate-50/80 sm:bg-white">
-                        <span class="text-[10px] font-black uppercase tracking-wider text-rose-500">Đi từ đâu?</span>
+            <div class="w-full max-w-2xl glass-panel p-2 sm:p-3 rounded-[3rem] space-y-2">
+                <div class="flex flex-col sm:flex-row bg-white/95 rounded-[2.5rem] overflow-hidden shadow-inner divide-y sm:divide-y-0 sm:divide-x divide-stone-100">
+                    <label class="flex flex-col gap-0.5 px-4 py-3 sm:py-4 sm:w-[38%] shrink-0 bg-stone-50/90 sm:bg-white">
+                        <span class="text-[10px] font-black uppercase tracking-wider text-red-800">Đi từ đâu?</span>
                         <input id="origin-query" type="text" autocomplete="address-level1" enterkeyhint="search" value="Sài Gòn"
                             placeholder="VD: Sài Gòn, Hà Nội…"
                             class="w-full bg-transparent text-slate-900 outline-none text-sm sm:text-base font-bold placeholder:text-slate-400 placeholder:font-semibold">
@@ -132,8 +157,8 @@
                 </div>
                 <div class="flex flex-col sm:flex-row gap-1 p-1">
                     <button type="button" onclick="askAI()"
-                        class="flex-1 bg-rose-500 hover:bg-rose-600 active:scale-[0.98] text-white px-6 py-4 rounded-xl sm:rounded-2xl font-black text-sm flex items-center justify-center gap-2 transition-transform shadow-lg">
-                        <span>Tìm với Duy</span><i class="fa-solid fa-wand-magic-sparkles"></i>
+                        class="flex-1 bg-gradient-to-r from-red-800 to-rose-700 hover:brightness-110 active:scale-[0.98] text-white px-6 py-4 rounded-[2rem] font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl ring-1 ring-amber-400/25">
+                        <span>Cùng Duy Vi Vu</span><i class="fa-solid fa-wand-magic-sparkles text-amber-200"></i>
                     </button>
                 </div>
             </div>
@@ -153,17 +178,17 @@
 
         <!-- Loading: skeleton -->
         <div id="loading" class="hidden">
-            <div id="loading-skeleton" class="space-y-4 py-6">
-                <div class="skeleton h-40 w-full"></div>
-                <div class="skeleton h-6 w-2/3"></div>
-                <div class="skeleton h-4 w-full"></div>
-                <div class="skeleton h-4 w-5/6"></div>
-                <div class="grid grid-cols-2 gap-3 pt-4">
-                    <div class="skeleton h-24 rounded-2xl"></div>
-                    <div class="skeleton h-24 rounded-2xl"></div>
+            <div id="loading-skeleton" class="space-y-5 py-8">
+                <div class="skeleton skeleton-round h-44 w-full opacity-90"></div>
+                <div class="skeleton h-7 w-3/4 rounded-2xl"></div>
+                <div class="skeleton h-4 w-full rounded-xl"></div>
+                <div class="skeleton h-4 w-5/6 rounded-xl"></div>
+                <div class="grid grid-cols-2 gap-4 pt-2">
+                    <div class="skeleton h-28 skeleton-round"></div>
+                    <div class="skeleton h-28 skeleton-round"></div>
                 </div>
             </div>
-            <p class="text-center text-slate-500 font-bold text-sm mt-4 animate-pulse">Duy đang dò bản đồ & thời tiết cho bạn…</p>
+            <p class="text-center text-red-900/70 font-bold text-sm mt-5 animate-pulse tracking-wide">Duy đang dò bản đồ &amp; thời tiết — chờ Duy tí nhé…</p>
         </div>
 
         <!-- Deal Hot: luôn hiện để bottom nav hoạt động -->
@@ -175,7 +200,7 @@
                 <a id="aff-agoda" href="#" target="_blank" rel="noopener sponsored"
                     class="card-duy p-6 flex flex-col gap-3 text-white shadow-xl border-2 border-blue-400/40 bg-gradient-to-br from-[#2f9bf9] via-[#1a7ee3] to-[#0a5fbd] hover:brightness-110 active:scale-[0.99] transition-all">
                     <span class="text-[10px] font-black uppercase tracking-widest text-white/90">Agoda · Đặt qua Duy Go</span>
-                    <span class="font-black text-xl leading-tight">Đặt khách sạn &amp; Tìm chỗ ở</span>
+                    <span class="font-black text-xl leading-tight">Đặt phòng Agoda</span>
                     <span class="text-sm text-white/90">Giá minh bạch — link tự nhảy theo điểm đến bạn vừa tìm.</span>
                     <span class="inline-flex items-center justify-center gap-2 mt-2 py-3 rounded-xl bg-white text-[#0a5fbd] font-black text-sm shadow-md">Mở Agoda ngay →</span>
                 </a>
@@ -188,12 +213,22 @@
                 </a>
             </div>
             <a id="aff-flights" href="#" target="_blank" rel="noopener sponsored"
-                class="card-duy block bg-gradient-to-r from-sky-600 to-indigo-600 text-white p-5 text-center font-black rounded-2xl shadow-lg active:scale-[0.99] transition-transform">
-                <i class="fa-solid fa-plane-circle-check mr-2"></i> Vé máy bay khứ hồi (từ điểm khởi hành → đến)
+                class="card-duy block bg-gradient-to-r from-sky-700 via-indigo-800 to-violet-900 text-white p-6 text-center font-black shadow-xl active:scale-[0.99] transition-transform ring-1 ring-amber-400/25">
+                <span class="text-[10px] uppercase tracking-[0.2em] text-amber-200/90 block mb-1">Affiliate · Duy nhắc bạn</span>
+                <i class="fa-solid fa-plane-circle-check mr-2 text-amber-200"></i> Săn vé máy bay khứ hồi (khởi hành → đến)
             </a>
-            <aside class="ad-slot rounded-2xl flex items-center justify-center text-xs text-slate-500 py-8" aria-label="Vị trí quảng cáo dọc">
-                Banner AdSense responsive (in-article)
+            <aside class="ad-slot rounded-[3rem] flex flex-col items-center justify-center text-xs text-stone-500 py-10 px-4" aria-label="Vị trí quảng cáo dọc">
+                <span class="font-bold text-amber-800/60 uppercase tracking-widest text-[10px] mb-2">AdSense in-article</span>
+                <span>Khung responsive cao cấp — đặt quảng cáo giữa Deal &amp; kết quả tìm kiếm.</span>
             </aside>
+        </section>
+
+        <section id="section-duy-alerts" class="mb-10 scroll-mt-28">
+            <h2 class="text-xl font-black text-stone-900 border-l-4 border-amber-500 pl-4 flex items-center gap-2">
+                <i class="fa-solid fa-bolt text-amber-600"></i> Tin nóng · Duy Alerts
+            </h2>
+            <p class="text-sm text-stone-600 mt-2 mb-4">Duy nhắc bạn tin du lịch &amp; thời tiết khẩn — vuốt ngang xem thêm.</p>
+            <div id="duy-alerts-root" class="flex gap-4 overflow-x-auto no-scrollbar pb-2 -mx-1 px-1"></div>
         </section>
 
         <div id="first-look-section" class="hidden animate-up space-y-8">
@@ -244,15 +279,15 @@
                     </select>
                     <button type="button" onclick="generateFullTrip()"
                         class="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-white px-8 py-3.5 rounded-2xl font-black text-sm shadow-lg active:scale-[0.98] transition-transform">
-                        Duy dựng timeline Sáng–Tối
+                        Duy dựng lịch Pro (Sáng–Tối)
                     </button>
                 </div>
             </div>
 
             <!-- Chia sẻ -->
             <div id="share-bar" class="flex flex-col sm:flex-row flex-wrap gap-2 justify-center">
-                <button type="button" onclick="sharePostcard()" class="card-duy flex-1 min-w-[140px] bg-amber-100 border border-amber-200 text-amber-950 font-bold py-3 px-4 rounded-2xl text-sm">
-                    <i class="fa-regular fa-image mr-2"></i> Postcard
+                <button type="button" onclick="sharePostcard()" class="card-duy flex-1 min-w-[140px] bg-gradient-to-br from-amber-100 to-amber-200/80 border border-amber-300/60 text-amber-950 font-black py-3 px-4 text-sm shadow-md">
+                    <i class="fa-regular fa-image mr-2"></i> Tải Postcard
                 </button>
                 <button type="button" onclick="shareToZalo()" class="card-duy flex-1 min-w-[140px] bg-blue-500 text-white font-bold py-3 px-4 rounded-2xl text-sm">
                     <i class="fa-solid fa-paper-plane mr-2"></i> Zalo
@@ -272,19 +307,22 @@
         </div>
 
         <div id="section-itinerary" class="hidden mt-10 scroll-mt-24">
-            <h2 class="text-xl sm:text-2xl font-black text-slate-800 mb-6 border-l-4 border-rose-500 pl-4">Lịch trình · Duy lo tất</h2>
+            <h2 class="text-xl sm:text-2xl font-black text-stone-900 mb-6 border-l-4 border-amber-500 pl-4">Lịch trình Pro · Duy lo tất</h2>
             <div id="itinerary-days" class="flex flex-col gap-8"></div>
         </div>
     </main>
 
-    <footer class="bg-slate-900 text-white py-10 px-4 text-center border-t-4 border-rose-500 mb-20 sm:mb-24">
-        <div class="text-xl font-black italic mb-1">DUY<span class="text-rose-400"> GO</span></div>
-        <p class="text-amber-100/80 text-xs font-semibold max-w-md mx-auto mb-2">Đi đâu cũng được, miễn là đi cùng nhau! ❤️</p>
-        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">DUY GO © 2026</p>
+    <footer class="bg-gradient-to-b from-stone-900 via-red-950 to-stone-950 text-white py-12 px-4 text-center border-t-4 border-amber-500/60 mb-20 sm:mb-24">
+        <div class="text-xl font-black italic mb-1 tracking-tight">DUY<span class="text-amber-300"> GO</span></div>
+        <p class="text-amber-50/90 text-xs font-semibold max-w-md mx-auto mb-3 leading-relaxed">Đi đâu cũng được, miễn là đi cùng nhau! ❤️</p>
+        <p class="sovereignty-line text-xs sm:text-sm font-serif max-w-lg mx-auto mb-6 px-2 leading-relaxed">
+            Hoàng Sa và Trường Sa là của Việt Nam 🇻🇳
+        </p>
+        <p class="text-stone-500 text-[10px] font-bold uppercase tracking-[0.2em]">DUY GO © 2026</p>
     </footer>
 
     <!-- Bottom navigation (mobile-first) -->
-    <nav class="bottom-nav fixed bottom-0 inset-x-0 z-[80] bg-white/95 backdrop-blur-md border-t border-slate-200" aria-label="Menu chính">
+    <nav class="bottom-nav fixed bottom-0 inset-x-0 z-[80]" aria-label="Menu chính">
         <div class="max-w-lg mx-auto flex justify-around items-stretch pt-2 pb-1 text-[10px] sm:text-xs font-bold text-slate-500">
             <button type="button" class="nav-btn flex flex-col items-center gap-1 p-2 flex-1 text-rose-500 nav-item-active" data-target="section-search" onclick="scrollToId('section-search'); setNavActive(this);">
                 <i class="fa-solid fa-magnifying-glass text-lg"></i>Tìm kiếm

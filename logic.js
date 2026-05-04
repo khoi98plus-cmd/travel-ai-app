@@ -1,5 +1,8 @@
 /** DUY GO — logic chính (mobile-first) */
-const API_URL = "https://travel-ai-api-qu6z.onrender.com";
+const API_URL = (typeof window !== "undefined" &&
+    (window.DUY_GO_API_BASE || window.TRAVEL_API_BASE)
+    ? String(window.DUY_GO_API_BASE || window.TRAVEL_API_BASE).replace(/\/$/, "")
+    : "https://dulichthuvi.onrender.com");
 
 const DuyAppState = {
     lastQuery: "",
@@ -18,6 +21,25 @@ const PERIOD_META = {
     chieu: { label: "Chiều", icon: "fa-cloud-sun", color: "bg-sky-500 text-white" },
     toi: { label: "Tối", icon: "fa-moon", color: "bg-indigo-600 text-white" },
 };
+
+/** Tin nóng minh họa — Duy Alerts (ảnh loremflickr theo tag) */
+const DUY_ALERT_ITEMS = [
+    {
+        title: "Tuyết rơi dày trên đỉnh đèo Hà Giang",
+        sub: "Không khí lạnh sâu — Duy nhắc bạn áo siêu ấm, găng tay và kiểm tra tuyến trước khi lên đèo.",
+        tag: "snow,mountain,vietnam",
+    },
+    {
+        title: "Nắng gắt biển Phú Quốc mùa khô",
+        sub: "UV cao — kem SPF 50+, nón rộng vành, nước uống đầy chai; tránh nắng giữa trưa.",
+        tag: "beach,tropical,sun",
+    },
+    {
+        title: "Sương mù Đà Lạt sáng sớm",
+        sub: "Tầm nhìn hạn chế — lái nhẹ ga, bật đèn sương; có thể hoãn tour đèo nếu cần.",
+        tag: "fog,forest,vietnam",
+    },
+];
 
 const TRAVEL_PHRASES = [
     { vi: "Cho em hỏi giá được không ạ?", en: "Could you tell me the price, please?" },
@@ -203,6 +225,99 @@ function groupSlotsByPeriod(slots) {
     return order.map((key) => ({ key, slots: buckets[key], meta: PERIOD_META[key] }));
 }
 
+/** Timeline Pro: phương tiện, thời gian, đặc sản (từ API hoặc ẩn nếu không có). */
+function slotProLinesHtml(slot) {
+    const vehicle = slot.vehicle || slot.phuong_tien || "";
+    const duration =
+        slot.duration ||
+        slot.eta ||
+        (slot.duration_min != null && !Number.isNaN(Number(slot.duration_min))
+            ? `${slot.duration_min} phút`
+            : "");
+    const food = slot.food || slot.specialty || slot.dac_san || "";
+    if (!vehicle && !duration && !food) return "";
+    const bits = [];
+    if (vehicle) {
+        bits.push(
+            `<span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-black text-amber-950 border border-amber-100/80"><i class="fa-solid fa-route text-amber-600"></i>${escHtml(vehicle)}</span>`
+        );
+    }
+    if (duration) {
+        bits.push(
+            `<span class="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-2.5 py-1 text-[10px] font-black text-sky-950 border border-sky-100/80"><i class="fa-regular fa-clock text-sky-600"></i>${escHtml(duration)}</span>`
+        );
+    }
+    if (food) {
+        bits.push(
+            `<span class="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-[10px] font-black text-rose-950 border border-rose-100/80"><i class="fa-solid fa-bowl-food text-rose-500"></i>${escHtml(food)}</span>`
+        );
+    }
+    return `<div class="flex flex-wrap gap-2 mt-2">${bits.join("")}</div>`;
+}
+
+function clothingAdviceText(tempC, code) {
+    const t = typeof tempC === "number" ? tempC : 26;
+    const c = Number(code);
+    let s = "";
+    if (t >= 30) s = "Gợi ý trang phục: đồ cotton mỏng, sandal thoáng, mũ rộng vành.";
+    else if (t >= 23) s = "Gợi ý trang phục: áo thun + quần dài nhẹ; mang thêm áo khoác mỏng buổi tối.";
+    else s = "Gợi ý trang phục: áo ấm, khăn cổ, giày kín — trời mát/lạnh Duy ôm team!";
+    if (!Number.isNaN(c) && c > 50 && c < 78) s += " Nên kẹp thêm ô gấp trong balo.";
+    return s;
+}
+
+function renderDuyAlerts() {
+    const root = document.getElementById("duy-alerts-root");
+    if (!root) return;
+    root.innerHTML = DUY_ALERT_ITEMS.map((item) => {
+        const img =
+            typeof ImageEngine !== "undefined" && ImageEngine.loremUrl
+                ? ImageEngine.loremUrl(item.tag, 560, 340)
+                : `https://loremflickr.com/560/340/${encodeURIComponent(item.tag)}`;
+        return `
+      <article class="shrink-0 w-[min(88vw,320px)] card-duy overflow-hidden border border-amber-300/35 bg-white/95 shadow-lg">
+        <div class="relative h-40 overflow-hidden">
+          <img src=${JSON.stringify(img)} alt="" class="w-full h-full object-cover" loading="lazy">
+          <span class="absolute top-3 left-3 text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-red-800 to-rose-700 text-amber-100 px-2.5 py-1 rounded-full shadow">Duy Alerts</span>
+        </div>
+        <div class="p-4 text-left">
+          <h3 class="font-black text-stone-900 text-sm leading-snug">${escHtml(item.title)}</h3>
+          <p class="text-xs text-stone-600 mt-2 leading-relaxed">${escHtml(item.sub)}</p>
+        </div>
+      </article>`;
+    }).join("");
+}
+
+function tryFillOriginFromGeolocation() {
+    if (!navigator.geolocation) return;
+    const input = document.getElementById("origin-query");
+    if (!input) return;
+    const current = String(input.value || "").trim();
+    if (current && current !== "Sài Gòn") return;
+    navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+            try {
+                const { latitude, longitude } = pos.coords;
+                const r = await fetch(
+                    `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=vi`
+                );
+                if (!r.ok) return;
+                const j = await r.json();
+                const label = [j.city, j.locality, j.principalSubdivision].filter(Boolean)[0];
+                if (label) {
+                    input.value = label;
+                    DuyAppState.lastOrigin = label;
+                    setAffiliateLinks(DuyAppState.lastTrip || {}, DuyAppState.lastQuery || "Việt Nam", label);
+                }
+            } catch {
+                /* ignore */
+            }
+        },
+        () => {},
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 }
+    );
+}
+
 async function geocodePlace(name) {
     const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=1&language=vi&format=json`;
     const r = await fetch(url);
@@ -233,6 +348,7 @@ function weatherCodeLabel(code) {
 
 function mergePackingHints(apiHints, tempC, wcode, place) {
     const base = Array.isArray(apiHints) ? [...apiHints] : [];
+    const mustHave = ["Giấy tờ tùy thân (CCCD / hộ chiếu)", "Sạc dự phòng & cáp điện thoại"];
     const low = typeof tempC === "number" ? tempC : 28;
     if (low >= 32) base.unshift("Kem chống nắng SPF cao + nước uống đầy chai");
     if (low <= 22) base.unshift("Áo khoác mỏng / khăn choàng");
@@ -240,7 +356,8 @@ function mergePackingHints(apiHints, tempC, wcode, place) {
         base.push("Kính bơi, dép xỏ ngón, túi chống nước cho điện thoại");
     }
     if (wcode != null && Number(wcode) > 50) base.push("Ô gấp gọn trong balo");
-    return [...new Set(base)].slice(0, 10);
+    const merged = [...mustHave, ...base];
+    return [...new Set(merged.map((x) => String(x).trim()))].slice(0, 12);
 }
 
 function budgetRows(days, tier) {
@@ -287,23 +404,25 @@ function renderWeatherCard(place, weatherJson) {
     if (!el) return;
     const cw = weatherJson && weatherJson.current_weather;
     if (!cw) {
-        el.innerHTML = `<p class="font-bold text-slate-700">Duy chưa dò được thời tiết — vẫn cứ vi vu, nhớ coi app thời tiết trước khi đi nha!</p>`;
+        el.innerHTML = `<p class="font-bold text-stone-800">Duy chưa dò được thời tiết — vẫn cứ Vi Vu, nhớ coi app thời tiết trước khi đi nha!</p>`;
         return;
     }
     const t = cw.temperature;
     const code = cw.weathercode;
     const tip = weatherCodeLabel(code);
+    const outfit = clothingAdviceText(t, code);
     el.innerHTML = `
         <div class="flex items-start justify-between gap-3 flex-wrap">
             <div>
-                <p class="text-[10px] font-black uppercase text-rose-500 tracking-widest">Dự báo nhanh</p>
-                <p class="text-lg font-black text-slate-900 mt-1">${escHtml(place)}</p>
-                <p class="text-4xl font-black text-rose-500 mt-2">${t}°C</p>
+                <p class="text-[10px] font-black uppercase text-red-800 tracking-widest">Dự báo · Duy nhắc bạn</p>
+                <p class="text-lg font-black text-stone-900 mt-1">${escHtml(place)}</p>
+                <p class="text-4xl font-black bg-gradient-to-r from-red-700 to-rose-500 bg-clip-text text-transparent mt-2">${t}°C</p>
             </div>
             <div class="text-right max-w-xs">
-                <p class="text-sm font-semibold text-slate-600">${escHtml(tip)}</p>
+                <p class="text-sm font-semibold text-stone-700">${escHtml(tip)}</p>
             </div>
-        </div>`;
+        </div>
+        <p class="text-xs text-stone-600 mt-4 pt-4 border-t border-amber-100/80 leading-relaxed"><i class="fa-solid fa-shirt text-amber-600 mr-2"></i>${escHtml(outfit)}</p>`;
 }
 
 function renderPackingCard(hints) {
@@ -320,8 +439,8 @@ function renderPackingCard(hints) {
         </li>`
     ).join("");
     el.innerHTML = `
-        <p class="text-[10px] font-black uppercase text-amber-600 tracking-widest mb-2">Hành lý · Checklist</p>
-        <ul class="space-y-2 text-sm font-medium text-slate-700">${items || "<li>Duy sẽ nhắc bạn mang balo nhẹ thôi — thêm gì tùy vibe chuyến đi!</li>"}</ul>`;
+        <p class="text-[10px] font-black uppercase text-red-900/80 tracking-widest mb-2">Checklist thông minh · Duy nhắc bạn</p>
+        <ul class="space-y-2 text-sm font-medium text-stone-800">${items || "<li>Duy nhắc bạn mang balo nhẹ — thêm gì tùy vibe chuyến đi!</li>"}</ul>`;
 }
 
 function renderBudgetCard(days, tier) {
@@ -573,7 +692,7 @@ async function renderLuxuryUI(data, imgUrl, query) {
 
     const wc = document.getElementById("weather-card");
     if (wc && !DuyAppState.lastWeather) {
-        wc.innerHTML = `<p class="text-sm font-semibold text-slate-600"><i class="fa-solid fa-cloud-sun text-rose-500 mr-2 animate-pulse"></i>Duy đang hỏi thời tiết cho <strong>${escHtml(data.place || query)}</strong>…</p>`;
+        wc.innerHTML = `<p class="text-sm font-semibold text-stone-700"><i class="fa-solid fa-cloud-sun text-amber-600 mr-2 animate-pulse"></i>Duy nhắc bạn đợi tí — đang lấy thời tiết cho <strong>${escHtml(data.place || query)}</strong>…</p>`;
     }
 
     if (grid) {
@@ -591,7 +710,7 @@ async function renderLuxuryUI(data, imgUrl, query) {
                     <div class="bg-amber-50 border border-amber-100 rounded-2xl p-4 flex gap-3 items-start">
                         <i class="fa-solid fa-mug-hot text-amber-500 text-xl mt-0.5"></i>
                         <div>
-                            <p class="text-[10px] font-black uppercase text-amber-600 tracking-widest">Duy thủ thỉ</p>
+                            <p class="text-[10px] font-black uppercase text-amber-700 tracking-widest">Duy Thủ Thỉ</p>
                             <span class="font-bold text-slate-800">${escHtml(data.cafe)}</span>
                         </div>
                     </div>
@@ -606,8 +725,8 @@ async function renderLuxuryUI(data, imgUrl, query) {
                             <i class="fa-solid fa-bed mr-2"></i>Tìm chỗ ở
                         </a>
                         <a href=${JSON.stringify(buildRoundTripFlightUrl(getOriginInput(), data.place || query))} target="_blank" rel="noopener sponsored"
-                            class="flex-1 text-center font-black py-4 px-4 rounded-2xl text-white shadow-lg active:scale-[0.98] transition-transform bg-gradient-to-br from-sky-500 to-indigo-600 border border-sky-300/40">
-                            <i class="fa-solid fa-plane mr-2"></i>Vé khứ hồi
+                            class="flex-1 text-center font-black py-4 px-4 rounded-2xl text-white shadow-lg active:scale-[0.98] transition-transform bg-gradient-to-br from-sky-600 to-indigo-800 border border-amber-300/30">
+                            <i class="fa-solid fa-plane mr-2 text-amber-200"></i>Săn vé khứ hồi
                         </a>
                     </div>
                 </div>
@@ -670,12 +789,13 @@ async function generateFullTrip() {
                         const rows = b.slots
                             .map(
                                 (slot) => `
-                            <div class="flex gap-3 pl-2 border-l-2 border-rose-200 py-2">
-                                <div class="text-[10px] font-black text-rose-500 shrink-0 w-14">${escHtml(slot.time || "")}</div>
+                            <div class="flex gap-3 pl-2 border-l-2 border-amber-200/90 py-3">
+                                <div class="text-[10px] font-black text-red-700 shrink-0 w-14">${escHtml(slot.time || "")}</div>
                                 <div class="min-w-0">
-                                    <p class="font-bold text-slate-900">${escHtml(slot.activity)}</p>
-                                    <p class="text-sm text-slate-600">${escHtml(slot.note)}</p>
-                                    <p class="text-xs text-rose-600 font-semibold mt-1">💬 ${escHtml(slot.joke)}</p>
+                                    <p class="font-bold text-stone-900">${escHtml(slot.activity)}</p>
+                                    <p class="text-sm text-stone-600">${escHtml(slot.note)}</p>
+                                    ${slotProLinesHtml(slot)}
+                                    <p class="text-xs text-rose-700 font-semibold mt-2">💬 ${escHtml(slot.joke)}</p>
                                 </div>
                             </div>`
                             )
@@ -697,11 +817,12 @@ async function generateFullTrip() {
                     ? slots
                           .map(
                               (slot) => `
-                        <div class="flex gap-3 py-2 border-b border-slate-100">
-                            <span class="text-xs font-black text-rose-500">${escHtml(slot.time || "")}</span>
+                        <div class="flex gap-3 py-2 border-b border-stone-100">
+                            <span class="text-xs font-black text-red-700">${escHtml(slot.time || "")}</span>
                             <div>
                                 <p class="font-bold">${escHtml(slot.activity)}</p>
-                                <p class="text-sm text-slate-600">${escHtml(slot.note)}</p>
+                                <p class="text-sm text-stone-600">${escHtml(slot.note)}</p>
+                                ${slotProLinesHtml(slot)}
                             </div>
                         </div>`
                           )
@@ -741,9 +862,9 @@ function shareText() {
     const t = DuyAppState.lastTrip;
     const q = DuyAppState.lastQuery;
     if (t && t.place) {
-        return `Cùng Duy vi vu ${t.place}! ${t.desc || ""} — DUY GO ❤️`;
+        return `Cùng Duy Vi Vu ${t.place}! ${t.desc || ""} — DUY GO ❤️`;
     }
-    return `Cùng Duy vi vu với DUY GO! Đi đâu cũng được, miễn là đi cùng nhau! ❤️ ${q || ""}`;
+    return `Cùng Duy Vi Vu cùng DUY GO! Đi đâu cũng được, miễn là đi cùng nhau! ❤️ ${q || ""}`;
 }
 
 function shareNative() {
@@ -807,7 +928,7 @@ function sharePostcard() {
     });
     ctx.fillStyle = "rgba(255,255,255,0.85)";
     ctx.font = "26px 'Plus Jakarta Sans',sans-serif";
-    ctx.fillText("Duy gợi ý nè · " + new Date().toLocaleDateString("vi-VN"), 80, h - 120);
+    ctx.fillText("Duy nhắc bạn · " + new Date().toLocaleDateString("vi-VN"), 80, h - 120);
     canvas.toBlob((blob) => {
         if (!blob) return shareNative();
         const url = URL.createObjectURL(blob);
@@ -822,6 +943,8 @@ function sharePostcard() {
 let _originDebounce;
 document.addEventListener("DOMContentLoaded", () => {
     fillPhrases();
+    renderDuyAlerts();
+    tryFillOriginFromGeolocation();
     setAffiliateLinks({}, "Việt Nam", getOriginInput());
     document.getElementById("duration")?.addEventListener("change", updateBudgetFromSelects);
     document.getElementById("budget")?.addEventListener("change", updateBudgetFromSelects);

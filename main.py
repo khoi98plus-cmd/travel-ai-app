@@ -67,8 +67,9 @@ def extract_json(text):
 def _default_trip(query: str):
     return {
         "place": query,
-        "desc": "Duy gợi ý nè: điểm đến cực chill, cứ vi vu thôi!",
-        "cafe": "Quán cafe địa phương view xịn — Cùng Duy vi vu nha!",
+        "place_en": query,
+        "desc": "Duy nhắc bạn: điểm đến cực chill — Cùng Duy Vi Vu thôi!",
+        "cafe": "Quán cafe view xịn — Duy Thủ Thỉ chọn giùm team nhé!",
         "img_tag": "vietnam,travel",
         "photo_spots": [
             {"name": "Góc hoàng hôn view thành phố", "tip": "Đứng cao một chút, chụp ngược sáng nhẹ cho mood film.", "maps_query": query},
@@ -92,9 +93,9 @@ def _default_trip(query: str):
 async def generate_trip(request: TravelRequest):
     try:
         prompt = (
-            f"Thông tin du lịch về '{request.query}' cho app DUY GO. "
+            f"Thông tin du lịch về '{request.query}' cho app DUY GO (Duy nhắc bạn, Cùng Duy Vi Vu). "
             "Trả về DUY NHẤT 1 JSON (không markdown): "
-            '{"place":"tên địa danh","desc":"mô tả ngắn thân thiện",'
+            '{"place":"tên địa danh","place_en":"tên tiếng Anh/ngắn cho tìm vé","desc":"mô tả ngắn thân thiện",'
             '"cafe":"gợi ý quán cafe/snack",'
             '"img_tag":"từ khóa tiếng Anh,comma,separated cho ảnh",'
             '"photo_spots":[{"name":"...","tip":"góc chụp/lưu ý","maps_query":"chuỗi tìm Google Maps"}],'
@@ -114,6 +115,7 @@ async def generate_trip(request: TravelRequest):
         if result:
             if not isinstance(result.get("place"), str) or not str(result.get("place", "")).strip():
                 result["place"] = request.query
+            result.setdefault("place_en", str(result.get("place", request.query)))
             # Đảm bảo các trường mảng tồn tại
             result.setdefault("photo_spots", _default_trip(request.query)["photo_spots"])
             result.setdefault("packing_hints", _default_trip(request.query)["packing_hints"])
@@ -129,11 +131,14 @@ async def generate_trip(request: TravelRequest):
 async def generate_full_itinerary(request: ItineraryRequest):
     try:
         prompt = (
-            f"Lịch trình {request.days} ngày tại {request.query}. Phong cách vui, ấm áp (nhân vật Duy). "
-            "Mỗi ngày có theme. Mỗi hoạt động có period là một trong: sang, trua, chieu, toi (khớp Sáng/Trưa/Chiều/Tối). "
+            f"Lịch trình {request.days} ngày tại {request.query}. Phong cách vui, ấm áp (DUY GO — Duy). "
+            "Mỗi ngày có theme. Mỗi slot có period: sang|trua|chieu|toi. "
+            "BẮT BUỘC mỗi slot có thêm: vehicle (phương tiện, VD: xe máy, Grab, xe buýt, đi bộ), "
+            "duration (thời gian dự kiến, VD: 25 phút), food (món đặc sản/ăn gợi ý tại điểm đó, ngắn). "
             "Trả về JSON duy nhất: "
             '{"itinerary":[{"day":1,"theme":"...","slots":['
-            '{"period":"sang","time":"07:00","activity":"...","note":"...","joke":"..."}'
+            '{"period":"sang","time":"07:00","activity":"...","note":"...","joke":"...",'
+            '"vehicle":"...","duration":"...","food":"..."}'
             "]}]} "
         )
 
