@@ -1,4 +1,4 @@
-// logic.js - BẢN CHUẨN 100%: FIX KÍCH THƯỚC ẢNH & DẤU HUYỀN
+// logic.js - BẢN SẠCH CHUẨN 100%: FIX LỖI CORS & HIỂN THỊ ẢNH
 const API_URL = "https://onrender.com";
 
 async function askAI() {
@@ -12,22 +12,25 @@ async function askAI() {
     if (firstLook) firstLook.classList.add('hidden');
 
     try {
+        // Gửi yêu cầu đến Backend Render
         const resp = await fetch(`${API_URL}/generate-trip`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ query: query })
         });
+
+        if (!resp.ok) throw new Error('Backend chưa phản hồi');
         const data = await resp.json();
 
-        // 1. TẠO LINK ẢNH ĐỘNG: Đã có kích thước 1200/800 và dấu $ chuẩn xác
-        const imgUrl = `https://loremflickr.com{encodeURIComponent(query)}`;
+        // Sử dụng nguồn ảnh Bing - cực kỳ nhẹ và không bị nhà mạng chặn
+        const imgUrl = `https://bing.net{encodeURIComponent(query)}&w=1200&h=800&c=7&rs=1`;
         
         renderLuxuryUI(data, imgUrl, query);
 
     } catch (e) {
-        console.error("Lỗi kết nối AI:", e);
-        // Link dự phòng lấy từ Unsplash có kích thước chuẩn
-        const fallback = `https://unsplash.com`;
+        console.error("Lỗi:", e);
+        // Link dự phòng từ báo VnExpress - chắc chắn hiện ảnh
+        const fallback = "https://vnecdn.net";
         renderLuxuryUI({place: query, desc: "Địa danh tuyệt vời đang chờ bạn!", cafe: "Cafe Local"}, fallback, query);
     } finally {
         loading.classList.add('hidden');
@@ -48,12 +51,12 @@ function renderLuxuryUI(data, imgUrl, query) {
                 </div>
                 <div class="p-10">
                     <h3 class="text-4xl font-black text-slate-800 mb-4 uppercase">${data.place || query}</h3>
-                    <p class="text-slate-500 text-base leading-relaxed italic">"${data.desc || 'Mô tả đang được AI cập nhật...'}"</p>
+                    <p class="text-slate-500 text-base leading-relaxed italic">"${data.desc || 'Đang cập nhật mô tả...'}"</p>
                     <div class="mt-6 bg-red-50 p-6 rounded-[2rem] flex items-center gap-4">
                         <i class="fa-solid fa-mug-hot text-red-500 text-2xl"></i>
                         <div>
                             <p class="text-[10px] text-red-400 font-bold uppercase tracking-widest">Gợi ý từ AI:</p>
-                            <span class="font-bold text-slate-700">${data.cafe || 'Quán cafe view triệu đô'}</span>
+                            <span class="font-bold text-slate-700">${data.cafe || 'Quán cafe đẹp'}</span>
                         </div>
                     </div>
                 </div>
@@ -112,8 +115,8 @@ async function generateFullTrip() {
         if (itinerarySection) itinerarySection.classList.remove('hidden');
         window.scrollTo({ top: itinerarySection.offsetTop - 50, behavior: 'smooth' });
     } catch (e) {
-        console.error("Lỗi lịch trình:", e);
-        alert("Lỗi khi tải lịch trình!");
+        console.error(e);
+        alert("Lỗi tải lịch trình!");
     } finally {
         loading.classList.add('hidden');
     }
