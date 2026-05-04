@@ -28,13 +28,37 @@ class ItineraryRequest(BaseModel):
     days: int
 
 def extract_json(text):
+    """Lấy JSON hợp lệ từ phản hồi LLM (bỏ markdown ```, khớp ngoặc {})."""
+    if not text or not isinstance(text, str):
+        return None
+    s = text.strip()
+    # Bỏ khối ```json ... ```
+    if s.startswith("```"):
+        s = re.sub(r"^```(?:json)?\s*", "", s, flags=re.IGNORECASE)
+        s = re.sub(r"\s*```\s*$", "", s)
+        s = s.strip()
+    start = s.find("{")
+    if start == -1:
+        try:
+            return json.loads(s)
+        except json.JSONDecodeError:
+            return None
+    depth = 0
+    for i in range(start, len(s)):
+        c = s[i]
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth == 0:
+                chunk = s[start : i + 1]
+                try:
+                    return json.loads(chunk)
+                except json.JSONDecodeError:
+                    return None
     try:
-        # Tìm nội dung trong cặp ngoặc nhọn đầu tiên và cuối cùng
-        match = re.search(r'\{.*\}', text, re.DOTALL)
-        if match:
-            return json.loads(match.group())
-        return json.loads(text)
-    except:
+        return json.loads(s)
+    except json.JSONDecodeError:
         return None
 
 @app.post("/generate-trip")
@@ -55,7 +79,8 @@ async def generate_trip(request: TravelRequest):
         content = response.choices[0].message.content
         result = extract_json(content)
         
-        if result: return result
+        if result:
+            return result
         raise ValueError("JSON format error")
 
     except Exception as e:
@@ -82,10 +107,11 @@ async def generate_full_itinerary(request: ItineraryRequest):
         )
         
         result = extract_json(response.choices[0].message.content)
-        if result: return result
-        return {"error": "Không thể tạo lịch trình"}
-    except:
-        return {"error": "Lỗi kết nối AI"}
+        if result and isinstance(result.get("itinerary"), list):
+            return result
+        return {"error": "Không thể tạo lịch trình", "itinerary": []}
+    except Exception:
+        return {"error": "Lỗi kết nối AI", "itinerary": []}
 
 @app.get("/")
 async def root():

@@ -5,24 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TravelVN - Trợ Lý Du Lịch AI Số 1 Việt Nam</title>
     
-    <meta name="referrer" content="no-referrer">
-
-    <link rel="preconnect" href="https://googleapis.com">
-    ...
-
-    
     <!-- Google Fonts & Thư viện (Đã sửa lỗi link chết của bản cũ) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://googleapis.com" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cloudflare.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
         .hero-bg { 
             background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), 
-            url('https://unsplash.com');
+            url('https://loremflickr.com/1920/1080/vietnam,landscape,travel');
             background-size: cover; background-position: center;
         }
         .glass-nav { 
@@ -137,9 +131,12 @@
         <p class="text-slate-500 text-xs font-bold uppercase tracking-widest">Hệ thống AI Travel Intelligence Số 1 Việt Nam © 2024</p>
     </footer>
 
+    <script>
+        /** Thay bằng URL FastAPI thật trên Render, ví dụ: https://ten-service-cua-ban.onrender.com */
+        window.TRAVEL_API_BASE = "https://dulichthuvi.onrender.com";
     </script>
-   <script src="image-engine.js"></script>
-<script src="logic.js"></script>
+    <script src="image-engine.js"></script>
+    <script src="logic.js"></script>
 
 </body>
 </html>
