@@ -3,342 +3,282 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#7f1d1d">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="DUY GO">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
     <title>DUY GO — Đi đâu cũng được, miễn là đi cùng nhau!</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800;1,700&family=Permanent+Marker&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <!-- Swiper for Image Slider -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <style>
-        :root {
-            --duy-rose: #f43f5e;
-            --duy-ink: #0f172a;
-            --duy-cream: #fff7ed;
+        :root{--duy-pastel-orange:#FFB38A;--duy-rose:#FCE4EC;--duy-lavender:#F3E5F5;--duy-sky:#E3F2FD;--duy-porcelain:#FAF8F5;--duy-text:#5D4037;--duy-text-dim:#8D6E63;--duy-neon-soft:rgba(255,179,138,0.4);--duy-neon:#FF5F1F}
+        html{scroll-behavior:smooth}
+        body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--duy-porcelain);background-image:radial-gradient(at 0% 0%,var(--duy-sky) 0,transparent 50%),radial-gradient(at 100% 0%,var(--duy-rose) 0,transparent 50%),radial-gradient(at 100% 100%,var(--duy-lavender) 0,transparent 50%);padding-bottom:calc(5.75rem + env(safe-area-inset-bottom,0));-webkit-tap-highlight-color:transparent;color:var(--duy-text)}
+        #audio-toggle{position:fixed;top:1rem;right:1rem;z-index:100;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,179,138,.3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.3s;color:var(--duy-pastel-orange)}
+        #audio-toggle.muted{opacity:.6}#audio-toggle:hover{transform:scale(1.1);background:rgba(255,255,255,.8)}
+        .hero-bg{background:linear-gradient(165deg,rgba(255,255,255,.8) 0,rgba(255,179,138,.2) 50%,rgba(255,255,255,.9) 100%),url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80');background-size:cover;background-position:center}
+        .glass{background:rgba(255,255,255,.5);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);border:1px solid rgba(255,255,255,.6)}
+        .card-duy{background:rgba(255,255,255,.6);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);border:1px solid rgba(255,255,255,.8);border-radius:2.5rem;box-shadow:0 15px 45px rgba(0,0,0,.03);transition:all .5s cubic-bezier(.4,0,.2,1)}
+        .card-duy:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 25px 60px rgba(0,0,0,.06);border-color:var(--duy-pastel-orange)}
+        .dreamy-img-container{position:relative;overflow:hidden;border-radius:2.5rem}
+        .dreamy-img-container::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 40px 20px rgba(250,248,245,.8);pointer-events:none}
+        .text-gradient-healing{background:linear-gradient(to right,var(--duy-pastel-orange),#FF8A65);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:800}
+        .bottom-nav{padding-bottom:env(safe-area-inset-bottom,.5rem);background:rgba(255,252,248,.88)!important;backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);border-top:1px solid rgba(255,255,255,.5);border-radius:1.75rem 1.75rem 0 0;margin:0 .5rem}
+        .lang-btn{background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.8);padding:4px 10px;border-radius:12px;font-size:10px;font-weight:800;transition:.3s}
+        .lang-btn.active{background:var(--duy-pastel-orange);color:#fff;border-color:var(--duy-pastel-orange)}
+        .nav-item-active{color:var(--duy-pastel-orange)!important;text-shadow:0 0 10px var(--duy-neon-soft)}
+        .no-scrollbar::-webkit-scrollbar{display:none}
+        .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+        .watermark-container{position:relative}
+        .watermark-overlay{position:absolute;bottom:1rem;left:1rem;font-size:10px;font-weight:900;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.2em;pointer-events:none;z-index:10;text-shadow:0 0 10px rgba(0,0,0,.5);background:rgba(0,0,0,.1);padding:2px 8px;border-radius:4px;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+        .skeleton{background:linear-gradient(105deg,#ede8e0 0,#faf8f5 38%,#f0ebe3 52%,#faf8f5 65%,#ede8e0 100%);background-size:220% 100%;animation:shimmer 1.85s cubic-bezier(.45,0,.55,1) infinite;border-radius:1.25rem}
+        @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+        @keyframes fadeInUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+        .animate-up{animation:fadeInUp .85s cubic-bezier(.4,0,.2,1) forwards}
+        @keyframes bounce-slow{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+        .animate-bounce-slow{animation:bounce-slow 3s ease-in-out infinite}
+        .approved-stamp {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 95, 31, 0.9);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transform: rotate(5deg);
+            border: 2px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 20;
+            pointer-events: none;
         }
-        html { scroll-behavior: smooth; }
-        body {
-            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
-            -webkit-tap-highlight-color: transparent;
-        }
-        .hero-bg {
-            background: linear-gradient(165deg, rgba(15,23,42,0.75) 0%, rgba(244,63,94,0.35) 45%, rgba(15,23,42,0.85) 100%),
-                url('https://loremflickr.com/1920/1080/vietnam,sunset,travel');
-            background-size: cover;
-            background-position: center;
-        }
-        .glass-nav {
-            background: rgba(15, 23, 42, 0.45);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        .card-duy {
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 40px -12px rgba(15, 23, 42, 0.18), 0 4px 16px -8px rgba(244, 63, 94, 0.12);
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(28px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-up { animation: fadeInUp 0.75s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        .skeleton {
-            background: linear-gradient(90deg, #e2e8f0 0%, #f8fafc 45%, #e2e8f0 90%);
-            background-size: 200% 100%;
-            animation: shimmer 1.15s ease-in-out infinite;
-            border-radius: 0.75rem;
-        }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .bottom-nav {
-            padding-bottom: env(safe-area-inset-bottom, 0.5rem);
-            box-shadow: 0 -12px 40px -16px rgba(15,23,42,0.25);
-        }
-        .nav-item-active { color: var(--duy-rose) !important; }
-        .ad-slot {
-            min-height: 90px;
-            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-            border: 1px dashed #cbd5e1;
-        }
-        #duy-drawer { transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1); }
-        #duy-drawer.open { transform: translateY(0); }
-        #postcard-canvas { display: none; }
     </style>
 </head>
-<body class="bg-orange-50/40 text-slate-900 antialiased">
-
-    <!-- Top bar -->
-    <div class="bg-slate-900 text-white text-[10px] sm:text-xs py-2 px-4 flex justify-between items-center font-bold tracking-wide z-[70] relative">
-        <div class="flex items-center gap-2 truncate">
-            <i class="fa-solid fa-heart text-rose-400 shrink-0"></i>
-            <span class="truncate">DUY GO · Cùng nhau là đủ</span>
-        </div>
-        <div class="flex gap-3 shrink-0 text-rose-300">
-            <i class="fab fa-facebook-f"></i>
-            <i class="fab fa-instagram"></i>
-        </div>
-    </div>
-
-    <header id="section-search" class="hero-bg min-h-[min(88vh,720px)] relative flex flex-col">
-        <nav class="glass-nav sticky top-0 z-50 px-4 sm:px-6 py-3 flex justify-between items-center text-white gap-2">
-            <div class="flex items-center gap-2 min-w-0 cursor-pointer" onclick="scrollToId('section-search')">
-                <div class="bg-rose-500 p-2 rounded-2xl shadow-lg shadow-rose-500/30 shrink-0">
-                    <i class="fa-solid fa-plane-departure text-amber-200 text-sm sm:text-base"></i>
-                </div>
-                <div class="min-w-0">
-                    <div class="text-lg sm:text-2xl font-black italic tracking-tight leading-none">DUY<span class="text-rose-400"> GO</span></div>
-                    <p class="text-[9px] sm:text-[10px] font-semibold text-amber-100/90 leading-tight mt-0.5 truncate max-w-[14rem] sm:max-w-xs">
-                        Đi đâu cũng được, miễn là đi cùng nhau! ❤️
-                    </p>
-                </div>
-            </div>
-            <button type="button" onclick="openDuyDrawer()" class="hidden sm:inline-flex bg-white/15 hover:bg-white/25 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border border-white/20">
-                Của Duy
+<body class="text-slate-900 antialiased overflow-y-auto" id="app-body">
+    <button id="audio-toggle" type="button" onclick="toggleBGM()" title="Âm nhạc">
+        <i class="fa-solid fa-music"></i>
+    </button>
+    <nav class="bottom-nav fixed bottom-0 left-0 right-0 z-[100] flex items-center justify-around px-2 py-3">
+        <div class="flex w-full max-w-lg items-center justify-between gap-1">
+            <button type="button" class="nav-btn flex flex-col items-center gap-1 p-2 flex-1 nav-item-active" onclick="showTab('search', this)">
+                <i class="fa-solid fa-compass text-lg"></i>Khám phá
             </button>
-        </nav>
-
-        <div class="flex-1 flex flex-col items-center justify-center text-white px-4 text-center animate-up pt-4 pb-10">
-            <p class="text-rose-200 text-xs sm:text-sm font-bold uppercase tracking-[0.2em] mb-2">Duy gợi ý nè</p>
-            <h1 class="text-3xl sm:text-5xl md:text-6xl font-black mb-4 drop-shadow-xl leading-tight">
-                Cùng Duy <span class="text-rose-400">vi vu</span> khắp nơi
-            </h1>
-            <p class="text-sm sm:text-lg mb-8 font-medium opacity-95 max-w-xl leading-relaxed">
-                Duy thủ thỉ: nhập điểm đến, Duy lo tất từ góc sống ảo đến lịch Sáng–Tối cho team mình nhé!
-            </p>
-
-            <div class="w-full max-w-2xl card-duy bg-white/12 p-2 sm:p-3 rounded-[1.75rem] backdrop-blur-xl border border-white/20 space-y-2">
-                <div class="flex flex-col sm:flex-row bg-white rounded-2xl overflow-hidden shadow-inner divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
-                    <label class="flex flex-col gap-0.5 px-4 py-3 sm:py-4 sm:w-[38%] shrink-0 bg-slate-50/80 sm:bg-white">
-                        <span class="text-[10px] font-black uppercase tracking-wider text-rose-500">Đi từ đâu?</span>
-                        <input id="origin-query" type="text" autocomplete="address-level1" enterkeyhint="search" value="Sài Gòn"
-                            placeholder="VD: Sài Gòn, Hà Nội…"
-                            class="w-full bg-transparent text-slate-900 outline-none text-sm sm:text-base font-bold placeholder:text-slate-400 placeholder:font-semibold">
-                    </label>
-                    <label class="flex flex-col gap-0.5 flex-1 px-4 py-3 sm:py-4 min-w-0">
-                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Điểm đến</span>
-                        <input id="query" type="text" enterkeyhint="search" autocomplete="off"
-                            placeholder="Đi đâu hôm nay? (VD: Đà Lạt, Phú Quốc…)"
-                            class="w-full bg-transparent text-slate-800 outline-none text-base font-bold placeholder:text-slate-400">
-                    </label>
-                </div>
-                <div class="flex flex-col sm:flex-row gap-1 p-1">
-                    <button type="button" onclick="askAI()"
-                        class="flex-1 bg-rose-500 hover:bg-rose-600 active:scale-[0.98] text-white px-6 py-4 rounded-xl sm:rounded-2xl font-black text-sm flex items-center justify-center gap-2 transition-transform shadow-lg">
-                        <span>Tìm với Duy</span><i class="fa-solid fa-wand-magic-sparkles"></i>
-                    </button>
-                </div>
-            </div>
-            <p class="mt-4 text-[11px] opacity-80">#DuyGo #CùngNhauLàĐủ</p>
-        </div>
-    </header>
-
-    <!-- AdSense placeholder (tinh tế) -->
-    <div class="max-w-3xl mx-auto px-4 -mt-6 relative z-10">
-        <aside class="ad-slot rounded-2xl flex flex-col items-center justify-center px-4 py-3 text-center" aria-label="Vị trí quảng cáo">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Sponsored · Google AdSense</span>
-            <p class="text-xs text-slate-500 mt-1">Ô quảng cáo 320×100 / responsive — gắn mã AdSense tại đây khi lên production.</p>
-        </aside>
-    </div>
-
-    <main class="max-w-3xl lg:max-w-5xl mx-auto py-8 sm:py-12 px-4 sm:px-6">
-
-        <!-- Loading: skeleton -->
-        <div id="loading" class="hidden">
-            <div id="loading-skeleton" class="space-y-4 py-6">
-                <div class="skeleton h-40 w-full"></div>
-                <div class="skeleton h-6 w-2/3"></div>
-                <div class="skeleton h-4 w-full"></div>
-                <div class="skeleton h-4 w-5/6"></div>
-                <div class="grid grid-cols-2 gap-3 pt-4">
-                    <div class="skeleton h-24 rounded-2xl"></div>
-                    <div class="skeleton h-24 rounded-2xl"></div>
-                </div>
-            </div>
-            <p class="text-center text-slate-500 font-bold text-sm mt-4 animate-pulse">Duy đang dò bản đồ & thời tiết cho bạn…</p>
-        </div>
-
-        <!-- Deal Hot: luôn hiện để bottom nav hoạt động -->
-        <section id="section-deals" class="space-y-4 mb-10 scroll-mt-28">
-            <h2 class="text-xl font-black text-slate-800 border-l-4 border-emerald-500 pl-4">Deal hot · Duy săn giùm</h2>
-            <p class="text-sm text-slate-600">Tìm điểm đến ở trên — Duy tự gắn link Agoda theo đúng nơi bạn chọn (ví dụ Đà Lạt → khách sạn Đà Lạt).</p>
-            <p class="text-[11px] text-slate-500 text-center font-semibold">Ưu đãi dành riêng cho bạn khi đặt qua Duy Go</p>
-            <div class="grid sm:grid-cols-2 gap-3">
-                <a id="aff-agoda" href="#" target="_blank" rel="noopener sponsored"
-                    class="card-duy p-6 flex flex-col gap-3 text-white shadow-xl border-2 border-blue-400/40 bg-gradient-to-br from-[#2f9bf9] via-[#1a7ee3] to-[#0a5fbd] hover:brightness-110 active:scale-[0.99] transition-all">
-                    <span class="text-[10px] font-black uppercase tracking-widest text-white/90">Agoda · Đặt qua Duy Go</span>
-                    <span class="font-black text-xl leading-tight">Đặt khách sạn &amp; Tìm chỗ ở</span>
-                    <span class="text-sm text-white/90">Giá minh bạch — link tự nhảy theo điểm đến bạn vừa tìm.</span>
-                    <span class="inline-flex items-center justify-center gap-2 mt-2 py-3 rounded-xl bg-white text-[#0a5fbd] font-black text-sm shadow-md">Mở Agoda ngay →</span>
-                </a>
-                <a id="aff-booking" href="#" target="_blank" rel="noopener sponsored"
-                    class="card-duy p-6 flex flex-col gap-3 text-white shadow-xl border-2 border-blue-900/30 bg-gradient-to-br from-[#003580] to-[#001b3d] hover:brightness-110 active:scale-[0.99] transition-all">
-                    <span class="text-[10px] font-black uppercase tracking-widest text-blue-200">Booking.com</span>
-                    <span class="font-black text-xl leading-tight">Đặt phòng dự phòng</span>
-                    <span class="text-sm text-blue-100/95">Ưu đãi dành riêng cho bạn khi đặt qua Duy Go</span>
-                    <span class="inline-flex items-center justify-center gap-2 mt-2 py-3 rounded-xl bg-white text-[#003580] font-black text-sm shadow-md">Mở Booking →</span>
-                </a>
-            </div>
-            <a id="aff-flights" href="#" target="_blank" rel="noopener sponsored"
-                class="card-duy block bg-gradient-to-r from-sky-600 to-indigo-600 text-white p-5 text-center font-black rounded-2xl shadow-lg active:scale-[0.99] transition-transform">
-                <i class="fa-solid fa-plane-circle-check mr-2"></i> Vé máy bay khứ hồi (từ điểm khởi hành → đến)
-            </a>
-            <aside class="ad-slot rounded-2xl flex items-center justify-center text-xs text-slate-500 py-8" aria-label="Vị trí quảng cáo dọc">
-                Banner AdSense responsive (in-article)
-            </aside>
-        </section>
-
-        <div id="first-look-section" class="hidden animate-up space-y-8">
-            <h2 class="text-xl sm:text-2xl font-black text-slate-800 border-l-4 border-rose-500 pl-4">
-                Duy Guide · Góc sống ảo & vibe địa phương
-            </h2>
-            <div id="gallery-row" class="flex gap-3 overflow-x-auto no-scrollbar pb-2 -mx-1 px-1"></div>
-            <div id="places-grid"></div>
-
-            <!-- Duy Lo Tất -->
-            <section class="space-y-6" aria-labelledby="duy-lo-title">
-                <h2 id="duy-lo-title" class="text-xl sm:text-2xl font-black text-slate-800 border-l-4 border-amber-500 pl-4">
-                    Duy lo tất · Thời tiết, hành lý & ngân sách
-                </h2>
-                <div id="weather-card" class="card-duy bg-white border border-slate-100 p-5 sm:p-6"></div>
-                <div class="grid sm:grid-cols-2 gap-4">
-                    <div id="packing-card" class="card-duy bg-white border border-slate-100 p-5 sm:p-6"></div>
-                    <div id="budget-card" class="card-duy bg-white border border-slate-100 p-5 sm:p-6"></div>
-                </div>
-            </section>
-
-            <!-- Duy Guide chi tiết -->
-            <section class="card-duy bg-gradient-to-br from-white to-rose-50/50 border border-rose-100 p-5 sm:p-7 space-y-5">
-                <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-camera-retro text-rose-500"></i> Tọa độ sống ảo
-                </h3>
-                <div id="photo-spots-list" class="space-y-3"></div>
-                <a id="maps-link-btn" href="#" target="_blank" rel="noopener noreferrer"
-                    class="inline-flex w-full sm:w-auto items-center justify-center gap-2 bg-slate-900 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg active:scale-[0.99] transition-transform">
-                    <i class="fa-solid fa-map-location-dot text-rose-300"></i> Xem vị trí trên Google Maps
-                </a>
-            </section>
-
-            <!-- Lên lịch -->
-            <div class="card-duy bg-slate-900 text-white p-6 sm:p-8 text-center space-y-5 border border-slate-700">
-                <h3 class="text-lg sm:text-xl font-black">Duy góp ý lịch chi tiết theo ngày nhé</h3>
-                <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-3">
-                    <select id="duration" class="bg-white text-slate-900 px-5 py-3.5 rounded-2xl font-black text-sm outline-none w-full sm:w-auto">
-                        <option value="1">1 ngày</option>
-                        <option value="2">2N1Đ</option>
-                        <option value="3" selected>3N2Đ</option>
-                        <option value="5">5N4Đ</option>
-                    </select>
-                    <select id="budget" class="bg-white text-slate-900 px-5 py-3.5 rounded-2xl font-black text-sm outline-none w-full sm:w-auto">
-                        <option value="eco">Tiết kiệm</option>
-                        <option value="mid" selected>Tiêu chuẩn</option>
-                        <option value="lux">Xả láng</option>
-                    </select>
-                    <button type="button" onclick="generateFullTrip()"
-                        class="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-white px-8 py-3.5 rounded-2xl font-black text-sm shadow-lg active:scale-[0.98] transition-transform">
-                        Duy dựng timeline Sáng–Tối
-                    </button>
-                </div>
-            </div>
-
-            <!-- Chia sẻ -->
-            <div id="share-bar" class="flex flex-col sm:flex-row flex-wrap gap-2 justify-center">
-                <button type="button" onclick="sharePostcard()" class="card-duy flex-1 min-w-[140px] bg-amber-100 border border-amber-200 text-amber-950 font-bold py-3 px-4 rounded-2xl text-sm">
-                    <i class="fa-regular fa-image mr-2"></i> Postcard
-                </button>
-                <button type="button" onclick="shareToZalo()" class="card-duy flex-1 min-w-[140px] bg-blue-500 text-white font-bold py-3 px-4 rounded-2xl text-sm">
-                    <i class="fa-solid fa-paper-plane mr-2"></i> Zalo
-                </button>
-                <button type="button" onclick="shareToMessenger()" class="card-duy flex-1 min-w-[140px] bg-indigo-500 text-white font-bold py-3 px-4 rounded-2xl text-sm">
-                    Messenger
-                </button>
-                <button type="button" onclick="shareNative()" class="card-duy flex-1 min-w-[140px] bg-slate-800 text-white font-bold py-3 px-4 rounded-2xl text-sm">
-                    <i class="fa-solid fa-share-nodes mr-2"></i> Chia sẻ
-                </button>
-            </div>
-
-            <div class="text-center text-sm text-slate-500 pb-4">
-                <p class="font-semibold text-slate-700">Cộng đồng DUY GO</p>
-                <p class="text-xs mt-1 italic">“Đi đâu cũng được, miễn là đi cùng nhau!” ❤️</p>
-            </div>
-        </div>
-
-        <div id="section-itinerary" class="hidden mt-10 scroll-mt-24">
-            <h2 class="text-xl sm:text-2xl font-black text-slate-800 mb-6 border-l-4 border-rose-500 pl-4">Lịch trình · Duy lo tất</h2>
-            <div id="itinerary-days" class="flex flex-col gap-8"></div>
-        </div>
-    </main>
-
-    <footer class="bg-slate-900 text-white py-10 px-4 text-center border-t-4 border-rose-500 mb-20 sm:mb-24">
-        <div class="text-xl font-black italic mb-1">DUY<span class="text-rose-400"> GO</span></div>
-        <p class="text-amber-100/80 text-xs font-semibold max-w-md mx-auto mb-2">Đi đâu cũng được, miễn là đi cùng nhau! ❤️</p>
-        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">DUY GO © 2026</p>
-    </footer>
-
-    <!-- Bottom navigation (mobile-first) -->
-    <nav class="bottom-nav fixed bottom-0 inset-x-0 z-[80] bg-white/95 backdrop-blur-md border-t border-slate-200" aria-label="Menu chính">
-        <div class="max-w-lg mx-auto flex justify-around items-stretch pt-2 pb-1 text-[10px] sm:text-xs font-bold text-slate-500">
-            <button type="button" class="nav-btn flex flex-col items-center gap-1 p-2 flex-1 text-rose-500 nav-item-active" data-target="section-search" onclick="scrollToId('section-search'); setNavActive(this);">
-                <i class="fa-solid fa-magnifying-glass text-lg"></i>Tìm kiếm
+            <button type="button" class="nav-btn flex flex-col items-center gap-1 p-2 flex-1" onclick="showTab('feed', this)">
+                <i class="fa-solid fa-clapperboard text-lg"></i>Bảng tin
             </button>
-            <button type="button" class="nav-btn flex flex-col items-center gap-1 p-2 flex-1" data-target="section-itinerary" onclick="scrollToItinerary(); setNavActive(this);">
+            <button type="button" class="nav-btn flex flex-col items-center gap-1 p-2 flex-1" onclick="showTab('itinerary', this)">
                 <i class="fa-solid fa-route text-lg"></i>Lịch trình
             </button>
-            <button type="button" class="nav-btn flex flex-col items-center gap-1 p-2 flex-1" data-target="section-deals" onclick="scrollToId('section-deals'); setNavActive(this);">
-                <i class="fa-solid fa-fire text-lg"></i>Deal Hot
-            </button>
-            <button type="button" class="nav-btn flex flex-col items-center gap-1 p-2 flex-1" data-target="duy-drawer" onclick="openDuyDrawer(); setNavActive(this);">
-                <i class="fa-solid fa-heart text-lg"></i>Của Duy
+            <button type="button" class="nav-btn flex flex-col items-center gap-1 p-2 flex-1" onclick="showTab('profile', this)">
+                <i class="fa-solid fa-user-astronaut text-lg"></i>Của Duy
             </button>
         </div>
     </nav>
+    <div id="tab-content" class="pb-24 overflow-y-auto h-full no-scrollbar">
+        <div id="tab-search" class="tab-pane active">
+            <header id="section-search" class="hero-bg min-h-[min(90vh,800px)] relative flex flex-col">
+                <nav class="glass sticky top-0 z-50 px-4 py-3 flex justify-between items-center text-white gap-2 border-b-0">
+                    <div class="flex items-center gap-2 cursor-pointer" onclick="showTab('search', document.querySelector('.nav-btn'))">
+                        <div class="bg-stone-900 p-1.5 rounded-2xl shadow-lg ring-1 ring-orange-500/40 shrink-0">
+                            <img src="logo.svg" alt="DUY GO" class="w-8 h-8 sm:w-10 sm:h-10">
+                        </div>
+                        <div class="min-w-0">
+                            <div class="text-lg sm:text-2xl font-black italic tracking-tight leading-none">DUY<span class="text-orange-500"> GO</span></div>
+                            <p class="text-[9px] sm:text-[10px] font-semibold text-orange-200/80 leading-tight mt-0.5 truncate max-w-[14rem]">Đi đâu cũng được, miễn là đi cùng nhau! ❤️</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div id="lang-switcher" class="flex gap-1.5">
+                            <button onclick="setLanguage('vn')" class="lang-btn active" id="lang-vn">VN</button>
+                            <button onclick="setLanguage('en')" class="lang-btn" id="lang-en">EN</button>
+                            <button onclick="setLanguage('cn')" class="lang-btn" id="lang-cn">CN</button>
+                        </div>
+                        <div id="duy-status" class="hidden sm:flex items-center gap-2 bg-white/40 px-3 py-1.5 rounded-full border border-white/20">
+                            <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                            <span id="duy-greeting-mini" class="text-[10px] font-bold">Duy đang thức...</span>
+                        </div>
+                        <button type="button" onclick="openDuyDrawer()" class="bg-white/15 hover:bg-white/25 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border border-white/20 transition-all active:scale-95">Của Duy</button>
+                    </div>
+                </nav>
+                <div class="flex-1 flex flex-col items-center justify-center text-white px-4 text-center animate-up pt-4 pb-10">
+                    <div class="mb-6 relative group">
+                        <div class="absolute -inset-1 bg-gradient-to-r from-amber-400 to-rose-500 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+                        <div class="relative w-20 h-20 sm:w-24 sm:h-24 bg-stone-900 rounded-full border-4 border-amber-400/30 overflow-hidden shadow-2xl mx-auto">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Duy&backgroundColor=b6e3f4" alt="Duy AI" class="w-full h-full object-cover">
+                        </div>
+                        <div class="mt-4 inline-block bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20">
+                            <p id="duy-main-greeting" class="text-xs sm:text-sm font-bold text-amber-200 tracking-wide">Đang kết nối với Duy...</p>
+                        </div>
+                    </div>
+                    <p class="text-amber-200/90 text-[10px] sm:text-xs font-black uppercase tracking-[0.25em] mb-2">Mạng Xã Hội Du Lịch</p>
+                    <h1 class="text-4xl sm:text-5xl md:text-7xl font-black mb-4 drop-shadow-2xl leading-tight tracking-tight">Cùng Duy <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-orange-500 to-orange-300">Vi Vu</span></h1>
+                    <p class="text-sm sm:text-lg mb-8 font-medium opacity-95 max-w-xl text-white/90"><span class="text-orange-500 font-bold">Duy:</span> "Tri kỷ ơi, hôm nay mình đi đâu cho 'chill' nhỉ? Nhập điểm đến, còn lại Duy lo từ A-Z luôn!"</p>
+                    <div class="w-full max-w-2xl glass p-2 sm:p-4 rounded-[3.5rem] space-y-3 shadow-2xl">
+                        <div class="flex flex-wrap items-center justify-center gap-2 mb-2">
+                            <div class="flex bg-white/10 p-1 rounded-full border border-white/10">
+                                <button onclick="setMood('chill')" class="mood-btn px-3 py-1 rounded-full text-[10px] font-bold transition-all hover:bg-white/20">Chill 🌿</button>
+                                <button onclick="setMood('vibe')" class="mood-btn px-3 py-1 rounded-full text-[10px] font-bold transition-all hover:bg-white/20">Vibe 🔥</button>
+                                <button onclick="setMood('healing')" class="mood-btn px-3 py-1 rounded-full text-[10px] font-bold transition-all hover:bg-white/20">Healing ✨</button>
+                            </div>
+                            <div class="h-4 w-px bg-white/20 mx-1"></div>
+                            <select id="budget-select" class="bg-white/10 text-[10px] font-bold px-3 py-1 rounded-full border border-white/10 outline-none appearance-none cursor-pointer">
+                                <option value="economy">Kinh tế 💸</option>
+                                <option value="standard" selected>Vừa đủ 💰</option>
+                                <option value="luxury">Chanh sả 💎</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col sm:flex-row bg-white/95 rounded-[3rem] overflow-hidden shadow-2xl divide-y sm:divide-y-0 sm:divide-x divide-stone-100">
+                            <label class="flex flex-col gap-0.5 px-4 py-3 sm:py-4 sm:w-[38%] shrink-0 bg-stone-50/90 sm:bg-white">
+                                <span class="text-[10px] font-black uppercase tracking-wider text-red-800">Đi từ đâu?</span>
+                                <input id="origin-query" type="text" value="Sài Gòn" class="w-full bg-transparent text-slate-900 outline-none text-sm sm:text-base font-bold">
+                            </label>
+                            <label class="flex flex-col gap-0.5 flex-1 px-4 py-3 sm:py-4 min-w-0">
+                                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Điểm đến</span>
+                                <input id="query" type="text" placeholder="Đi đâu hôm nay? (VD: Đà Lạt...)" class="w-full bg-transparent text-slate-800 outline-none text-base font-bold">
+                            </label>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-1 p-1">
+                            <button type="button" onclick="askAI(); playWelcomeMessage();" class="flex-1 bg-gradient-to-r from-red-800 to-rose-700 hover:brightness-110 active:scale-[0.98] text-white px-6 py-4 rounded-[2rem] font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl ring-1 ring-amber-400/25">
+                                <span>Cùng Duy Vi Vu</span><i class="fa-solid fa-wand-magic-sparkles text-amber-200"></i>
+                            </button>
+                            <button type="button" onclick="toggleVoice()" id="voice-btn" class="bg-white/20 hover:bg-white/30 text-white w-14 h-14 rounded-full flex items-center justify-center transition-all border border-white/30">
+                                <i class="fa-solid fa-microphone text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="ai-radio-ui" class="hidden fixed bottom-24 right-4 z-[60] animate-bounce-slow">
+                        <button onclick="playAIRadio()" class="bg-gradient-to-br from-amber-400 to-rose-500 p-4 rounded-2xl shadow-2xl border border-white/30 group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-black/20 rounded-full flex items-center justify-center"><i class="fa-solid fa-play text-white group-hover:scale-110 transition-transform"></i></div>
+                                <div class="text-left"><p class="text-[10px] font-black uppercase text-white/80">AI Radio</p><p class="text-xs font-bold text-white">Duy đang thỏ thẻ...</p></div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </header>
 
-    <!-- Drawer: Bộ công cụ Duy -->
-    <div id="duy-drawer-overlay" class="fixed inset-0 bg-black/40 z-[90] hidden opacity-0 transition-opacity" onclick="closeDuyDrawer()"></div>
-    <div id="duy-drawer" class="fixed z-[95] inset-x-0 bottom-0 max-h-[85vh] bg-white rounded-t-[2rem] shadow-2xl translate-y-full overflow-hidden flex flex-col">
-        <div class="p-4 border-b border-slate-100 flex justify-between items-center shrink-0">
-            <div>
-                <p class="text-[10px] font-black uppercase text-rose-500 tracking-widest">Của Duy</p>
-                <h3 class="text-lg font-black text-slate-900">Bộ công cụ vi vu</h3>
+            <main class="max-w-3xl lg:max-w-5xl mx-auto py-8 px-4 sm:px-6">
+                <div id="loading" class="hidden">
+                    <div class="flex flex-col items-center justify-center py-10">
+                        <div id="lottie-loading" class="w-48 h-48"></div>
+                        <div id="loading-skeleton" class="w-full space-y-5 py-8">
+                            <div class="skeleton skeleton-round h-44 w-full opacity-90"></div>
+                            <div class="skeleton h-7 w-3/4 rounded-2xl"></div>
+                        </div>
+                        <p class="text-center text-red-900/70 font-bold text-sm mt-5 animate-pulse">Duy đang dò bản đồ & thời tiết — chờ Duy tí nhé…</p>
+                    </div>
+                </div>
+
+                <div id="first-look-section" class="hidden animate-up space-y-8">
+                    <div id="places-grid"></div>
+                    <section class="space-y-6">
+                        <h2 class="text-xl sm:text-2xl font-black text-slate-800 border-l-4 border-amber-500 pl-4">Duy lo tất · Thời tiết & Hành lý</h2>
+                        <div id="weather-card" class="card-duy bg-white border border-slate-100 p-5 sm:p-6"></div>
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div id="packing-card" class="card-duy bg-white border border-slate-100 p-5 sm:p-6"></div>
+                            <div id="budget-card" class="card-duy bg-white border border-slate-100 p-5 sm:p-6"></div>
+                        </div>
+                    </section>
+                </div>
+
+                <section id="section-deals" class="mt-12 space-y-4 scroll-mt-28">
+                    <h2 class="text-xl font-black text-slate-800 border-l-4 border-emerald-500 pl-4">Deal hot · Duy săn giùm</h2>
+                    <div class="grid sm:grid-cols-2 gap-3">
+                        <a id="aff-agoda" href="#" target="_blank" class="card-duy p-6 flex flex-col gap-3 text-white shadow-xl bg-gradient-to-br from-[#2f9bf9] via-[#1a7ee3] to-[#0a5fbd]">
+                            <span class="font-black text-xl">Đặt phòng Agoda</span>
+                            <span class="text-sm opacity-90">Link tự nhảy theo điểm đến bạn vừa tìm.</span>
+                        </a>
+                        <a id="aff-booking" href="#" target="_blank" class="card-duy p-6 flex flex-col gap-3 text-white shadow-xl bg-gradient-to-br from-[#003580] to-[#001b3d]">
+                            <span class="font-black text-xl">Booking.com</span>
+                            <span class="text-sm opacity-90">Ưu đãi dành riêng cho tri kỷ của Duy.</span>
+                        </a>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Feed Tab -->
+        <div id="tab-feed" class="tab-pane hidden max-w-3xl mx-auto px-4 py-8">
+            <h2 class="text-2xl font-black text-stone-900 mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-fire-flame-curved text-rose-500"></i> Bảng tin Vi Vu
+            </h2>
+            <div id="social-feed-list" class="space-y-6"></div>
+        </div>
+
+        <!-- Itinerary Tab -->
+        <div id="tab-itinerary" class="tab-pane hidden max-w-3xl mx-auto px-4 py-8">
+            <h2 class="text-2xl font-black text-stone-900 mb-6 border-l-4 border-amber-500 pl-4">Lịch trình của bạn</h2>
+            <div id="itinerary-days" class="flex flex-col gap-8"></div>
+        </div>
+
+        <!-- Profile Tab -->
+        <div id="tab-profile" class="tab-pane hidden max-w-3xl mx-auto px-4 py-8">
+            <div class="card-duy bg-white p-8 border-stone-100 text-center relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-rose-500 to-amber-400 opacity-20"></div>
+                <div class="relative pt-4">
+                    <div class="w-24 h-24 bg-stone-900 rounded-full border-4 border-white shadow-xl mx-auto mb-4 overflow-hidden group">
+                        <img id="user-avatar" src="" class="w-full h-full object-cover">
+                    </div>
+                    <h3 id="user-name" class="text-2xl font-black text-stone-900"></h3>
+                    <div class="inline-flex items-center gap-2 bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider mt-2">
+                        <i class="fa-solid fa-medal"></i> <span id="user-rank"></span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-stone-100">
+                        <div><p id="stat-trips" class="text-xl font-black">0</p><p class="text-[10px] text-stone-400 uppercase">Chuyến đi</p></div>
+                        <div><p id="stat-followers" class="text-xl font-black">1.2k</p><p class="text-[10px] text-stone-400 uppercase">Followers</p></div>
+                        <div><p id="stat-duyxu" class="text-xl font-black">1,200</p><p class="text-[10px] text-stone-400 uppercase">Duy Xu</p></div>
+                    </div>
+                </div>
             </div>
-            <button type="button" onclick="closeDuyDrawer()" class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600" aria-label="Đóng">
-                <i class="fa-solid fa-xmark"></i>
+            <button onclick="handleLogout()" class="w-full mt-8 card-duy bg-stone-100 text-stone-600 py-4 font-black text-sm flex items-center justify-center gap-2">
+                <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
             </button>
         </div>
-        <div class="overflow-y-auto p-4 space-y-6 pb-24">
-            <div class="card-duy border border-slate-100 p-4 space-y-3">
+    </div>
+
+    <!-- Drawer: Bộ công cụ Duy -->
+    <div id="duy-drawer-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden opacity-0 transition-opacity duration-300" onclick="closeDuyDrawer()"></div>
+    <div id="duy-drawer" class="fixed z-[95] inset-x-0 bottom-0 max-h-[90vh] bg-[#faf8f5] rounded-t-[3rem] shadow-2xl translate-y-full transition-transform duration-500 overflow-hidden flex flex-col">
+        <div class="p-6 border-b border-stone-200 flex justify-between items-center shrink-0">
+            <div><p class="text-[10px] font-black uppercase text-rose-500 tracking-widest">Tri kỷ của Duy</p><h3 class="text-2xl font-black text-stone-900">Góc Của Duy</h3></div>
+            <button type="button" onclick="closeDuyDrawer()" class="w-10 h-10 rounded-full bg-stone-200 flex items-center justify-center text-stone-600 active:scale-90 transition-transform"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="overflow-y-auto p-6 space-y-6 pb-24 no-scrollbar">
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="openPhotoQuest()" class="card-duy bg-white p-4 text-left border border-rose-100"><div class="w-10 h-10 bg-rose-100 rounded-2xl flex items-center justify-center mb-3"><i class="fa-solid fa-camera-retro text-rose-600"></i></div><h4 class="text-sm font-black text-stone-900">Photo Quest</h4></button>
+                <button onclick="drawTarot()" class="card-duy bg-white p-4 text-left border border-purple-100"><div class="w-10 h-10 bg-purple-100 rounded-2xl flex items-center justify-center mb-3"><i class="fa-solid fa-sparkles text-purple-600"></i></div><h4 class="text-sm font-black text-stone-900">Travel Tarot</h4></button>
+                <button onclick="openBillSplitter()" class="card-duy bg-white p-4 text-left border border-emerald-100"><div class="w-10 h-10 bg-emerald-100 rounded-2xl flex items-center justify-center mb-3"><i class="fa-solid fa-file-invoice-dollar text-emerald-600"></i></div><h4 class="text-sm font-black text-stone-900">Duy Đòi Nợ</h4></button>
+                <button onclick="openTimeCapsule()" class="card-duy bg-white p-4 text-left border border-blue-100"><div class="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center mb-3"><i class="fa-solid fa-box-archive text-blue-600"></i></div><h4 class="text-sm font-black text-stone-900">Time Capsule</h4></button>
+            </div>
+            <div class="card-duy border border-slate-100 p-4 space-y-3 bg-white">
                 <h4 class="font-black text-slate-800 flex items-center gap-2"><i class="fa-solid fa-coins text-amber-500"></i> Đổi tiền nhanh</h4>
-                <label class="text-xs font-bold text-slate-500">VND → USD (tỷ giá tham khảo)</label>
-                <input id="fx-vnd" type="number" inputmode="decimal" placeholder="1000000" class="w-full border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-800">
+                <input id="fx-vnd" type="number" placeholder="1000000" class="w-full border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-800">
                 <p id="fx-usd" class="text-rose-600 font-black text-lg">≈ — USD</p>
-                <p class="text-[10px] text-slate-400">Duy nhắc: tỷ giá chỉ mang tính minh họa, đổi thật tại ngân hàng nhé.</p>
-            </div>
-            <div class="card-duy border border-slate-100 p-4 space-y-2">
-                <h4 class="font-black text-slate-800 flex items-center gap-2"><i class="fa-solid fa-comments text-sky-500"></i> Từ điển tí hon</h4>
-                <ul id="phrase-list" class="text-sm space-y-2 text-slate-700"></ul>
-            </div>
-            <div class="card-duy border border-rose-100 bg-rose-50/50 p-4 space-y-2">
-                <h4 class="font-black text-slate-800 flex items-center gap-2"><i class="fa-solid fa-shield-heart text-rose-500"></i> Duy cảnh báo an ninh</h4>
-                <ul id="drawer-safety-list" class="text-sm space-y-2 text-slate-700 list-disc pl-4"></ul>
             </div>
         </div>
     </div>
 
-    <canvas id="postcard-canvas" width="1080" height="1350" aria-hidden="true"></canvas>
-
     <script>
-        window.DUY_GO_API_BASE = "https://dulichthuvi.onrender.com";
+        window.DUY_GO_API_BASE = "http://localhost:8000/api";
         window.TRAVEL_API_BASE = window.DUY_GO_API_BASE;
     </script>
+    <audio id="lofi-bgm" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
     <script src="image-engine.js"></script>
+    <script src="mockData.js"></script>
     <script src="logic.js"></script>
 </body>
 </html>

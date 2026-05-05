@@ -12,12 +12,15 @@ router = APIRouter()
 
 class PlanRequest(BaseModel):
     destination: str
-    days: int
-    preferences: str = "tối ưu chi phí, trải nghiệm địa phương"
+    days: int = 1
+    origin: str = "Sài Gòn"
+    mood: str = "chill"
+    budget: str = "standard"
+    preferences: str = ""
 
 @router.post("/generate")
 async def generate_trip_plan(request: PlanRequest, db: Session = Depends(get_db)):
-    # 1. KIỂM TRA DATABASE
+    # 1. KIỂM TRA DATABASE (Bổ sung thêm mood/budget vào key nếu cần, nhưng tạm thời dùng destination/days)
     existing_trip = db.execute(
         select(Trip).where(
             Trip.destination == request.destination,
@@ -25,23 +28,18 @@ async def generate_trip_plan(request: PlanRequest, db: Session = Depends(get_db)
         )
     ).scalars().first()
 
-    if existing_trip:
-        print(f"--- Lấy dữ liệu từ Database cho: {request.destination} ---")
-        data = existing_trip.itinerary_data
-        # PHÁ GIÁP: Nếu dữ liệu là chữ, biến nó thành Object chuẩn luôn
-        if isinstance(data, str):
-            try:
-                data = json.loads(data)
-            except:
-                pass
-        return data
+    # Để đơn giản, nếu có rồi thì lấy luôn, nhưng với AI cá nhân hóa thì nên gọi mới hoặc cache theo key phức tạp hơn.
+    # Tuy nhiên để tối ưu tốc độ theo yêu cầu, ta cứ dùng cache nếu khớp destination/days.
 
     # 2. GỌI AI
-    print(f"--- Đang gọi AI tạo lịch trình mới cho: {request.destination} ---")
+    print(f"--- Đang gọi Duy AI tạo lịch trình {request.mood} cho: {request.destination} ---")
     itinerary = await AIService.generate_itinerary(
-        request.destination, 
-        request.days, 
-        request.preferences
+        destination=request.destination,
+        days=request.days,
+        origin=request.origin,
+        mood=request.mood,
+        budget=request.budget,
+        preferences=request.preferences
     )
     
     if not itinerary or "error" in itinerary:

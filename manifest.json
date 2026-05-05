@@ -1,0 +1,21 @@
+{
+  "name": "DUY GO - Siêu Ứng Dụng Du Lịch",
+  "short_name": "DUY GO",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#9f1239",
+  "theme_color": "#9f1239",
+  "description": "Cùng Duy Vi Vu khắp nơi với AI du lịch dẫn đầu xu hướng.",
+  "icons": [
+    {
+      "src": "https://api.dicebear.com/7.x/avataaars/svg?seed=Duy&backgroundColor=b6e3f4",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "https://api.dicebear.com/7.x/avataaars/svg?seed=Duy&backgroundColor=b6e3f4",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

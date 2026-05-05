@@ -1,0 +1,10 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="128" fill="#050505"/>
+  <!-- Cách điệu chữ D hiện đại bằng nét liền mạch -->
+  <path d="M160 120V392C160 392 380 392 380 256C380 120 160 120 160 120Z" stroke="#FF5F1F" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M160 256H280" stroke="#FF5F1F" stroke-width="40" stroke-linecap="round"/>
+  <!-- Hiệu ứng điểm nhấn công nghệ -->
+  <circle cx="380" cy="256" r="15" fill="#FF5F1F"/>
+  <circle cx="160" cy="120" r="10" fill="#FF5F1F"/>
+  <circle cx="160" cy="392" r="10" fill="#FF5F1F"/>
+</svg>
